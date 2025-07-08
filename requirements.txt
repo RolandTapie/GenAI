@@ -1,0 +1,7 @@
+fitz
+scikit-learn
+numpy
+pdfminer.six
+sentence_transformers
+openai
+python-dotenv
