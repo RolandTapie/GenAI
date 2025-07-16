@@ -1,16 +1,20 @@
 import openai
-from functions.prompt import OpenAIPrompt
+from prompt import OpenAIPrompt
 import json
+from colorama import Fore, Style, init
+init()
 
 api_key="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"
+
 if api_key is None:
     raise ValueError("Vous devez fournir une clé API OpenAI via le paramètre 'api_key'.")
 else:
-    nom = input(f"Bonjour comment t'appeles tu ? ")
+    nom = input(f"{Fore.BLUE}🤖 : Bonjour, comment t'appelles tu ? \n👤 : {Style.RESET_ALL}")
     while True:
 
-        question = input(f"comment puis-je vous aider {nom} : ")
-        if question.lower() in ['exit', 'quit']:
+        question = input(f"{Fore.BLUE}🤖 : comment puis-je t'aider {nom} : \n👤 {nom} : {Style.RESET_ALL}")
+        if question.lower() in ['exit', 'quit',"bye"]:
+            print(f"🤖 : je suis ravi de t'avoir aidé {nom}, à la prochaine...")
             break
 
         openai.api_key = api_key
@@ -51,4 +55,4 @@ else:
                 temperature=0.7
             )
 
-        print(response.choices[0].message.content)
+        print(f"{Fore.BLUE}🤖 " + response.choices[0].message.content)
