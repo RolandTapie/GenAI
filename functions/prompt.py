@@ -2,7 +2,7 @@ from typing import List, Dict, Optional
 from typing import List, Dict, Any
 import json
 
-class Prompt():
+class OpenAIPrompt():
     def __init__(self):
         pass
 
