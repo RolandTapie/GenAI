@@ -10,7 +10,8 @@ else:
     fonctions=["timer","weather"]
     proprietes=["propriete_1","propriete_2"]
 
-    prompt=Prompt().generate_prompt("gpt-4o","tu es un assistant expert","quelle est la météo à liège",fonctions,proprietes)
+    question="quel est le president du honduras"
+    prompt=Prompt().generate_prompt("gpt-4o","tu es un assistant expert",question,fonctions,proprietes)
     print(prompt["messages"])
     response = openai.chat.completions.create(
         model=prompt["model"],
@@ -19,26 +20,26 @@ else:
         temperature=0.7
     )
     message=prompt["messages"]
-    for tool_call in response.choices[0].message.tool_calls:
-        name = tool_call.function.name
-        args = json.loads(tool_call.function.arguments)
 
-        message.append(response.choices[0].message)
+    if  not response.choices[0].message.tool_calls == None:
+        for tool_call in response.choices[0].message.tool_calls:
+            name = tool_call.function.name
+            args = json.loads(tool_call.function.arguments)
 
-        result = '26 dégrés'
-        message.append({
-            "role": "tool",
-            "tool_call_id": tool_call.id,
-            "content": str(result)
-        })
+            message.append(response.choices[0].message)
 
+            result = '23 dégrés'
+            message.append({
+                "role": "tool",
+                "tool_call_id": tool_call.id,
+                "content": str(result)
+            })
 
-
-    response = openai.chat.completions.create(
-        model=prompt["model"],
-        messages=message,
-        tools=prompt["tools"],
-        temperature=0.7
-    )
+        response = openai.chat.completions.create(
+            model=prompt["model"],
+            messages=message,
+            tools=prompt["tools"],
+            temperature=0.7
+        )
 
     print(response.choices[0].message.content)
