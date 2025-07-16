@@ -49,6 +49,7 @@ import requests
 import openai
 
 def send_prompt(prompt, model_name="mistral", api_key=None):
+    print(test_llm_server())
     try:
         if model_name.lower() == "mistral":
             response = requests.post(
@@ -88,6 +89,39 @@ def send_prompt(prompt, model_name="mistral", api_key=None):
 
     return ""
 
+def send_mistral(user , question , model_name="mistral", api_key=None):
+    print(test_llm_server())
+    try:
+        if model_name.lower() == "mistral":
+            response = requests.post(
+                "http://localhost:11434/api/generate",
+                json={
+                    "model": model_name,
+                    "prompt": f"""
+                              Tu es un assistant expert.
+                              Question :
+                              {question}  
+                              """,
+                    "stream": False
+                },
+                #timeout=30  # Sécurité : éviter que ça tourne en boucle
+            )
+            response.raise_for_status()
+            #debug = response.json()
+            print(response.json().get("response", "").strip())
+            return response.json().get("response", "").strip()
+
+        else:
+            raise ValueError(f"Modèle non pris en charge : {model_name}")
+
+    except requests.exceptions.RequestException as e:
+        print(f"Erreur réseau avec le modèle local : {e}")
+    except openai.error.OpenAIError as e:
+        print(f"Erreur OpenAI : {e}")
+    except Exception as e:
+        print(f"Erreur inattendue : {e}")
+
+    return ""
 
 def generate_prompt(user_role,question,context):
     prompt=f"""

@@ -18,4 +18,4 @@ def print_test(data: str):
 
 
 if __name__ == "__main__":
-   server.run(transport="sse")
+   server.run(transport="stdio")
