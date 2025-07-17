@@ -1,6 +1,17 @@
 
 # 🧠 Agent IA – Interaction avec Fonctions & Serveur MCP
 
+![Python](https://img.shields.io/badge/Python-3.9%2B-blue?logo=python&logoColor=white)
+![OpenAI](https://img.shields.io/badge/OpenAI-API-black?logo=openai)
+![dotenv](https://img.shields.io/badge/dotenv-env%20variables-9cf)
+![NumPy](https://img.shields.io/badge/NumPy-numeric-orange?logo=numpy)
+![scikit-learn](https://img.shields.io/badge/Scikit--Learn-ML-blue?logo=scikit-learn)
+![Sentence Transformers](https://img.shields.io/badge/Sentence--Transformers-semantic-lightgrey)
+![PDFMiner](https://img.shields.io/badge/pdfminer.six-PDF--parser-yellow)
+![Fitz](https://img.shields.io/badge/Fitz-PDF--viewer-red)
+![MCP](https://img.shields.io/badge/MCP-Server-green)
+
+
 ## 🗂️ Description du projet
 
 Ce projet met en œuvre un **agent conversationnel intelligent** capable de répondre à des requêtes en langage naturel. Il est conçu pour fonctionner selon deux modes :
@@ -24,6 +35,11 @@ Ce projet met en œuvre un **agent conversationnel intelligent** capable de rép
 
 | Librairie              | Description |
 |------------------------|-------------|
+| `fitz` (PyMuPDF)       | Manipulation de documents PDF. |
+| `pdfminer.six`         | Extraction de texte depuis des fichiers PDF. |
+| `scikit-learn`         | Outils de machine learning pour traitement de données. |
+| `numpy`                | Calcul numérique. |
+| `sentence_transformers`| Encodage sémantique de phrases. |
 | `openai`               | Accès aux modèles de langage d'OpenAI. |
 | `python-dotenv`        | Gestion des variables d’environnement via fichiers `.env`. |
 | `mcp[cli]`             | Interface CLI pour serveur MCP (nécessite Node.js). |
