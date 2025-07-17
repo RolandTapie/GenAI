@@ -2,9 +2,18 @@ import openai
 from prompt import OpenAIPrompt
 import json
 from colorama import Fore, Style, init
+from dotenv import load_dotenv
+import os
+
+# Charger les variables depuis le fichier .env
+load_dotenv()
+
+# Lire les variables d'environnement
+openai_api_key = os.getenv("openai_key")
+
 init()
 
-api_key="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"
+api_key=openai_api_key
 
 if api_key is None:
     raise ValueError("Vous devez fournir une clé API OpenAI via le paramètre 'api_key'.")
