@@ -3,6 +3,16 @@ from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 
+from dotenv import load_dotenv
+import os
+# Charger les variables depuis le fichier .env
+load_dotenv()
+# Lire les variables d'environnement
+
+pdf_path = os.getenv("business_file")
+model_path = os.getenv("model_path")
+
+
 # 1. Extraire les paragraphes du PDF
 def extract_paragraphs_from_pdf(pdf_path):
     full_text = extract_text(pdf_path)
@@ -11,25 +21,25 @@ def extract_paragraphs_from_pdf(pdf_path):
     return paragraphs
 
 # 2. Construire les embeddings
-def build_embeddings(paragraphs, model_name=r"C:\Users\tallar\Documents\PROJETS\GenAI\LLM_Model\Embedding\models--sentence-transformers--all-MiniLM-L6-v2"):
+def build_embeddings(paragraphs, model_name):
     model = SentenceTransformer(model_name)
     embeddings = model.encode(paragraphs, normalize_embeddings=True)
     return model, embeddings
 
 # 3. Recherche des passages pertinents
-def search(query, model, embeddings, paragraphs, top_k=1):
+def search(query, model, embeddings, paragraphs, top_k=3):
     query_embedding = model.encode([query], normalize_embeddings=True)
     similarities = cosine_similarity(query_embedding, embeddings).flatten()
     top_k_indices = np.argsort(similarities)[-top_k:][::-1]
     return [(paragraphs[i], similarities[i]) for i in top_k_indices]
 
 # === MAIN ===
-pdf_path = r"C:\Users\tallar\Documents\PROJETS\GenAI\ChatBot\files\IntroML_Azencott.pdf"
+
 paragraphs = extract_paragraphs_from_pdf(pdf_path)
 
 print(f"Nombre de paragraphes extraits : {len(paragraphs)}")
 
-model, embeddings = build_embeddings(paragraphs)
+model, embeddings = build_embeddings(paragraphs,model_path)
 
 print("Modèle chargé et embeddings calculés.")
 

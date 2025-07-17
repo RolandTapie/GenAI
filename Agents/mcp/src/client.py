@@ -1,9 +1,18 @@
 import asyncio
 from functions.agent import Agent
+from dotenv import load_dotenv
+import os
+# Charger les variables depuis le fichier .env
+load_dotenv()
+# Lire les variables d'environnement
+openai_api_key = os.getenv("openai_key")
+pdf_path = os.getenv("business_file")
+model_path = os.getenv("model_path")
+mcp_server = os.getenv("mcp_serveur_path")
+transport=os.getenv("mcp_transport")
 
-agent=Agent("Mistral")
+agent=Agent("Mistral",mcp_server)
 
-transport="stdio"
 if __name__ == "__main__":
     if transport == "stdio":
         # changer le mode de transport dans le serveur mcp

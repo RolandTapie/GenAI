@@ -10,12 +10,22 @@ from typing import Any, Dict, List, Optional
 
 from functions.rag import extract_paragraphs,encode_chunks,retrieve_top_k,generate_answer_with_llm,test_llm_server,reformulation,send_prompt,send_mistral
 
+import os
+from dotenv import load_dotenv
+# Charger les variables depuis le fichier .env
+load_dotenv()
+# Lire les variables d'environnement
+pdf_path = os.getenv("business_file")
+model_path = os.getenv("model_path")
+mcp_server = os.getenv("mcp_serveur_path")
+transport=os.getenv("mcp_transport")
 
 
 class Agent():
 
-    def __init__(self, model: str):
+    def __init__(self, model: str, mcp_serveur):
         self.model=model
+        self.mcp_serveur=mcp_serveur
         self.exit_stack = AsyncExitStack()
         self.session: Optional[ClientSession] = None
         self.stdio: Optional[Any] = None
@@ -30,11 +40,12 @@ class Agent():
         await self.exit_stack.__aexit__(exc_type, exc_val, exc_tb)
 
 
-    async def main_stdio (self, server_path: str = r"C:\Users\tallar\Documents\PROJETS\GenAI\Agents\mcp\serveur.py"):
+    async def main_stdio (self):
         # Define server parameters
+        print(self.mcp_serveur)
         server_params = StdioServerParameters(
             command="python",  # The command to run your server
-            args=[server_path],  # Arguments to the command
+            args=[self.mcp_serveur],  # Arguments to the command
         )
 
         # Connect to the server
@@ -49,9 +60,6 @@ class Agent():
                 for tool in tools_result.tools:
                     print(f"  - {tool.name}: {tool.description}")
 
-                # Call our calculator tool
-                result = await session.call_tool("print_test", arguments={"data":"Roland"})
-                print(f"2 + 3 = {result.content[0].text}")
 
 
     async def main_sse(self):
@@ -67,12 +75,9 @@ class Agent():
                 for tool in tools_result.tools:
                     print(f"  - {tool.name}: {tool.description}")
 
-                # Call our calculator tool
-                result = await session.call_tool("print_test", arguments={"data":"Roland"})
-                print(f"2 + 3 = {result.content[0].text}")
 
 
-    async def connect_to_server(self, server_path: str = r"C:\Users\tallar\Documents\PROJETS\GenAI\Agents\mcp\serveur.py"):
+    async def connect_to_server(self, server_path: str = mcp_server):
         """Connect to an MCP server.
 
        Args:
@@ -202,4 +207,3 @@ async def main():
         await agent.process_query("quelle est la capitale de la france?")
 
 
-asyncio.run(main())

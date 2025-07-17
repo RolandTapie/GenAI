@@ -1,5 +1,6 @@
 import openai
-from prompt import OpenAIPrompt
+from functions.prompt import OpenAIPrompt
+from tools.weather import get_weather
 import json
 from colorama import Fore, Style, init
 from dotenv import load_dotenv
@@ -28,7 +29,7 @@ else:
 
         openai.api_key = api_key
         fonctions=["timer","weather", "agenda"]
-        proprietes=["propriete_1","propriete_2"]
+        proprietes=["latitude","longitude"]
 
         #question="quel est le president du honduras"
         prompt=OpenAIPrompt().generate_prompt("gpt-4o","tu es un assistant expert",question,fonctions,proprietes)
@@ -50,7 +51,7 @@ else:
                 if name=="agenda":
                     result="le rendez vous a été enregistré dans l'agenda personnelle"
                 elif name=="weather":
-                    result = '23 dégrés'
+                    result = get_weather(**args)
                 message.append({
                     "role": "tool",
                     "tool_call_id": tool_call.id,

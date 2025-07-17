@@ -2,6 +2,14 @@ from pdfminer.high_level import extract_text
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
+from dotenv import load_dotenv
+import os
+
+# Charger les variables depuis le fichier .env
+load_dotenv()
+
+# Lire les variables d'environnement
+pdf_path = os.getenv("business_file")
 
 # 1. Lire le PDF
 def extract_text_from_pdf(pdf_path):
@@ -25,7 +33,7 @@ def search(query, vectorizer, vectors, chunks, k=3):
     return [chunks[i] for i in top_k]
 
 # === MAIN ===
-pdf_path = r"C:\Users\tallar\Documents\PROJETS\GenAI\ChatBot\files\IntroML_Azencott.pdf"
+
 chunks = extract_text_from_pdf(pdf_path)
 vectorizer, vectors = build_index(chunks)
 

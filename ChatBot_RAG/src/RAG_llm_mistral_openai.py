@@ -5,11 +5,16 @@ from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 from pdfminer.high_level import extract_text
 from openai import OpenAI
+from colorama import Fore, Style, init
 
-# 🔐 Charge la clé API OpenAI
+from dotenv import load_dotenv
+import os
+# Charger les variables depuis le fichier .env
 load_dotenv()
-cle = os.getenv("OPENAI_API_KEY")
-print(cle)
+# Lire les variables d'environnement
+cle = os.getenv("openai_key")
+pdf_path = os.getenv("business_file")
+model_path = os.getenv("model_path")
 
 # === 1. Extraction du texte du PDF ===
 def extract_paragraphs(pdf_path):
@@ -34,7 +39,7 @@ def generate_answer(cle,question, context_chunks):
     context = "\n\n".join(context_chunks)
     prompt = f"""Tu es un assistant expert.
 
-    Voici des extraits d'un document. Utilise-les pour répondre à la question.
+    Voici des extraits d'un document. Utilise-les uniquement pour répondre à la question.
     
     Contexte :
     {context}
@@ -52,25 +57,30 @@ def generate_answer(cle,question, context_chunks):
             temperature=0.3,
             max_tokens=400,
         )
-    return response['choices'][0]['message']['content'].strip()
+    return response.choices[0].message.content.strip()
 
 print("⏳ Chargement du modèle et du PDF...")
-model = SentenceTransformer(r"C:\Users\tallar\Documents\PROJETS\GenAI\LLM_Model\Embedding\models--sentence-transformers--all-MiniLM-L6-v2")
-pdf_path = r"C:\Users\tallar\Documents\PROJETS\GenAI\ChatBot\files\IntroML_Azencott.pdf"  # 🔁 Remplace par le chemin vers ton PDF
+model = SentenceTransformer(model_path)
+
 chunks = extract_paragraphs(pdf_path)
 embeddings = encode_chunks(chunks, model)
 
 # === MAIN ===
 if __name__ == "__main__":
+    nom = input(f"{Fore.BLUE}🤖 : Bonjour, comment t'appelles tu ? \n👤 : {Style.RESET_ALL}")
+    while True:
 
-    question = input("Pose ta question : ")
+        question = input(f"{Fore.BLUE}🤖 : comment puis-je t'aider {nom} : \n👤 {nom} : {Style.RESET_ALL}")
+        if question.lower() in ['exit', 'quit',"bye"]:
+            print(f"🤖 : je suis ravi de t'avoir aidé {nom}, à la prochaine...")
+            break
 
-    top_chunks = retrieve_top_k(question, chunks, embeddings, model, k=3)
 
-    print("\n💬 Réponse générée :\n")
+        top_chunks = retrieve_top_k(question, chunks, embeddings, model, k=3)
 
-    print(top_chunks)
+        print("\n💬 Réponse générée :\n")
 
-    cle="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"
-    answer = generate_answer(cle, question, top_chunks)
-    print(answer)
+        print(top_chunks)
+
+        answer = generate_answer(cle, question, top_chunks)
+        print(answer)

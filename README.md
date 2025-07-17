@@ -78,7 +78,7 @@ OPENAI_API_KEY=your_openai_key_here
 ### 4. Lancer un test simple
 
 ```bash
-python test_openai.py
+python ai_agent.py
 ```
 
 ### 5. (Optionnel) Lancer le serveur MCP
@@ -96,7 +96,7 @@ mcp start
 .
 ├── src/
 │   ├── ChatBot_LangChain.py     # Version de l'agent avec LangChain
-│   ├── ChatBot_Mistral.py       # Variante utilisant un autre modèle
+│   ├── RAG_llm_mistral_Fusion.py       # Variante utilisant un autre modèle
 ├── serveur.py                   # Interaction avec le serveur MCP
 ├── test_openai.py               # Script de test de l'agent
 ├── prompt.py                    # Fichier de définition des prompts
