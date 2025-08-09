@@ -129,6 +129,7 @@ if "messages" not in st.session_state:
         {"role": "bot", "content": "Bonjour 👋 — je suis un chatbot, comment puis je vous aider?"}
     ]
 
+
 def render_chat_html(messages):
     """Construit un unique bloc HTML pour la zone de chat."""
     html_parts = []
