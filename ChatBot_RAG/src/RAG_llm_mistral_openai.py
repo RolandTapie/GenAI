@@ -39,7 +39,7 @@ def generate_answer(cle,question, context_chunks):
     context = "\n\n".join(context_chunks)
     prompt = f"""Tu es un assistant expert.
 
-    Voici des extraits d'un document. Utilise-les uniquement pour répondre à la question.
+    Voici des extraits d'un document. Utilise uniquement les informations du contexte ci-dessous pour répondre à la question.
     
     Contexte :
     {context}
@@ -54,7 +54,7 @@ def generate_answer(cle,question, context_chunks):
     response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[{"role": "user", "content": prompt}],
-            temperature=0.3,
+            temperature=0,
             max_tokens=400,
         )
     return response.choices[0].message.content.strip()

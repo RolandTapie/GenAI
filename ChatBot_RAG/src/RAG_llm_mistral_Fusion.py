@@ -51,8 +51,8 @@ if __name__ == "__main__":
             contexts.append(top_chunks)
 
             print("\n📚 Extraits sélectionnés :\n")
-            for c in top_chunks:
-                print("- " + c + "\n")
+            #for c in top_chunks:
+                #print("- " + c + "\n")
 
             print("la question")
             print(question)
