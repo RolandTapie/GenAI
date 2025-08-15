@@ -31,7 +31,7 @@ def search(query, model, embeddings, paragraphs, top_k=3):
     query_embedding = model.encode([query], normalize_embeddings=True)
     similarities = cosine_similarity(query_embedding, embeddings).flatten()
     top_k_indices = np.argsort(similarities)[-top_k:][::-1]
-    return [(paragraphs[i], similarities[i]) for i in top_k_indices]
+    return [paragraphs[i] for i in top_k_indices]
 
 # === MAIN ===
 

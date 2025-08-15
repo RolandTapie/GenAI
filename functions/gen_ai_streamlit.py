@@ -1,26 +1,37 @@
 import streamlit as st
 from datetime import datetime
 import html as pyhtml
+import requests
 
 
 from llm import model
-from dotenv import load_dotenv
-import os
+from rag import RagModel
 
-load_dotenv()
-openai_api_key = os.getenv("openai_key")
-gemini_api_key = os.getenv("gemini_key")
-model = model()
+document= r"C:\Users\tallar\Downloads\Famille bamendjou de liege-20250801T201343Z-1-001\Famille bamendjou de liege\ARESBAL_ ROI et statut.pdf"
 
-model.set_openai_key(openai_api_key)
-model.set_openai_model("gpt-4o")
-model.set_openai_base_url("https://api.openai.com/v1")
+def rag_api(host,port,root,question):
+    print(f"http://{host}:{port}/{root}?request={question}")
+    response = requests.post(f"http://{host}:{port}/{root}?request={question}")
+    print(response.text)
+    return response.text
 
-model.set_gemini_key(gemini_api_key)
-model.set_gemini_model("gemini-2.5-flash")
-model.set_gemini_base_url("https://generativelanguage.googleapis.com/v1beta/openai/")
+# --- Initialisation unique des modèles ---
+if "gen_model" not in st.session_state:
+    with st.spinner("Initialisation du modèle génératif..."):
+        st.session_state.gen_model = model("openai")
+    st.success("Modèle génératif ✅")
 
-model.init_model("openai")
+# if "rag" not in st.session_state:
+#     with st.spinner("Initialisation du modèle RAG..."):
+#         st.session_state.rag = RagModel(
+#             document,
+#             "Mistral",
+#             "text-embedding-3-small"
+#         )
+#     st.success("Modèle RAG prêt ✅")
+
+gen_model = st.session_state.gen_model
+#rag = st.session_state.rag
 
 st.set_page_config(page_title="Chatbot RAG - Ville de Liège", page_icon="💬", layout="centered")
 
@@ -134,7 +145,7 @@ def render_chat_html(messages):
     """Construit un unique bloc HTML pour la zone de chat."""
     html_parts = []
     html_parts.append("<div class='chat-wrapper'>")
-    html_parts.append("<div class='chat-header'><h2 style='margin:6px 0 0 0;'>💬 Chatbot RAG - Démo Frontend</h2>")
+    html_parts.append(f"<div class='chat-header'><h2 style='margin:6px 0 0 0;'>💬 Chatbot RAG - {document}Frontend</h2>")
     html_parts.append("<div style='color:rgba(255,255,255,0.9); font-size:14px;'>Prototype (sans LLM) — réponses = question pour tests</div></div>")
     html_parts.append("<div class='chat-area'>")
 
@@ -172,7 +183,12 @@ with st.form(key="chat_form", clear_on_submit=True):
         # Ajouter message utilisateur
         st.session_state.messages.append({"role": "user", "content": user_input.strip()})
         # Simuler réponse identique à la question (pour test)
-        st.session_state.messages.append({"role": "bot", "content": model.ask(user_input.strip())})
+        with st.spinner("Le bot réfléchit... 🧠💭"):
+            query=user_input.strip()
+            context = rag_api("localhost",8000,"/query",query)
+            print(context)
+            gen_model.set_context(context)
+        st.session_state.messages.append({"role": "bot", "content": gen_model.ask(query,"Mistral")})
         # relancer pour rafraîchir (nouvelle méthode)
         st.rerun()
 

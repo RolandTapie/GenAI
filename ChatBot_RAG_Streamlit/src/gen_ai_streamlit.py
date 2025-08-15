@@ -4,22 +4,11 @@ import html as pyhtml
 
 
 from functions.llm import model
-from dotenv import load_dotenv
-import os
-load_dotenv()
-openai_api_key = os.getenv("openai_key")
-gemini_api_key = os.getenv("gemini_key")
-model = model()
+from functions.rag import RagModel
 
-model.set_openai_key(openai_api_key)
-model.set_openai_model("gpt-4o")
-model.set_openai_base_url("https://api.openai.com/v1")
+gen_model = model("openai")
 
-model.set_gemini_key(gemini_api_key)
-model.set_gemini_model("gemini-2.5-flash")
-model.set_gemini_base_url("https://generativelanguage.googleapis.com/v1beta/openai/")
-
-model.init_model("gemini")
+rag = RagModel(r"C:\Users\tallar\Documents\PROJETS\GenAI\docs\files\Aresbal.pdf",model("openai"),"text-embedding-3-small")
 
 st.set_page_config(page_title="Chatbot RAG - Demo", page_icon="💬", layout="centered")
 
@@ -170,7 +159,9 @@ with st.form(key="chat_form", clear_on_submit=True):
         # Ajouter message utilisateur
         st.session_state.messages.append({"role": "user", "content": user_input.strip()})
         # Simuler réponse identique à la question (pour test)
-        st.session_state.messages.append({"role": "bot", "content": model.ask(user_input.strip())})
+        query=user_input.strip()
+        gen_model.set_context(rag.rag_query(query))
+        st.session_state.messages.append({"role": "bot", "content": gen_model.ask(query)})
         # relancer pour rafraîchir (nouvelle méthode)
         st.rerun()
 

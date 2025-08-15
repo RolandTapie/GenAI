@@ -1,9 +1,12 @@
 from typing import List, Dict, Optional
 from typing import List, Dict, Any
 from openai import OpenAI
-from llm import *
+import requests
 from dotenv import load_dotenv
 import os
+import numpy as np
+import faiss
+
 load_dotenv()
 openai_api_key = os.getenv("openai_key")
 gemini_api_key = os.getenv("gemini_key")
@@ -11,7 +14,8 @@ gemini_api_key = os.getenv("gemini_key")
 import json
 
 class model():
-    def __init__(self):
+    def __init__(self, model_name):
+        self.model_name = model_name
         self.openai_key= None
         self.gemini_key= None
         self.openai_model= None
@@ -19,7 +23,27 @@ class model():
         self.base_url_openai=""
         self.base_url_gemini=""
         self.prompt=None
+        self.embeddings= None
+        self.documents=None
+        self.role="Tu es un assistant"
+        self.task=""
+        self.context=""
+        self.reasoning=""
+        self.output_format=""
+        self.stop_condition=""
+        self.api_key=None
 
+        self.set_openai_key(openai_api_key)
+        self.set_openai_model("gpt-4o")
+        self.set_openai_base_url("https://api.openai.com/v1")
+
+        self.set_gemini_key(gemini_api_key)
+        self.set_gemini_model("gemini-2.5-flash")
+
+        self.init_model()
+
+    def set_document(self, document):
+        self.documents=document
     def set_openai_key (self,key: str):
         self.openai_key=key
 
@@ -38,26 +62,102 @@ class model():
     def set_gemini_base_url(self, url: str):
         self.gemini_base_url = url
 
-    def init_model(self, mode):
-        if mode=="openai":
-            self.model=OpenAI(api_key=openai_api_key,base_url=self.openai_base_url)
-            self.llm_model=self.openai_model
-        elif mode=="gemini":
+    def set_context(self, context: str):
+        self.context = context
+
+    def set_task(self, task: str):
+        self.task=task
+
+    def init_model(self):
+        #self.model_name=="openai":
+        self.model=OpenAI(api_key=openai_api_key,base_url=self.openai_base_url)
+        self.llm_model=self.openai_model
+        self.api_key = self.openai_key
+        if self.model_name=="gemini":
             self.model=OpenAI(api_key=gemini_api_key,base_url=self.gemini_base_url)
             self.llm_model=self.gemini_model
+            self.api_key = self.gemini_key
 
-    def ask(self, message):
+    def decouper_en_chunks(self,texte, taille_max=500, overlap=50):
+        """
+        Découpe le texte en morceaux (chunks) avec chevauchement optionnel.
+        - taille_max : taille maximale d'un chunk (en caractères)
+        - overlap : nombre de caractères qui se chevauchent entre deux chunks
+        """
+        chunks = []
+        start = 0
+        while start < len(texte):
+            end = start + taille_max
+            chunk = texte[start:end]
+            chunks.append(chunk)
+            start += taille_max - overlap  # avance avec chevauchement
+        return chunks
+
+    def embedding(self, chunks):
+
+        embeddings=[]
+        for chunck in chunks:
+            resp = self.model.embeddings.create(
+                model="text-embedding-3-small",
+                input=chunck
+            )
+            embeddings.append(resp.data[0].embedding)
+        return np.array(embeddings).astype("float32")
+
+    def Faiss_index(self):
+        dimension = self.embeddings.shape[1]
+        self.index = faiss.IndexFlatL2(dimension)  # L2 = distance euclidienne
+        self.index.add(self.embeddings)
+        print(f"{self.index.ntotal} documents indexés.")
+
+    def find_similarity(self, text):
+        text_emb = self.embedding(text)
+        distances, indices = self.index.search(text_emb, k=5)
+        print("\nRésultats de la recherche :")
+        results=[]
+        for idx, dist in zip(indices[0], distances[0]):
+            results.append(self.documents[idx])
+        return results
+
+    def ask(self, message, model="openai"):
         messages=[
             {"role": "system", "content": "Tu es un assistant"},
-            {"role": "user", "content": f"{message}"}
+            {"role": "user", "content": f" tu es un {self.role} ; context: {self.context} ; task: {message} reasoning: {self.reasoning}"}
         ]
-        result = self.model.chat.completions.create(
-            model=self.llm_model,
-            messages=messages
-            #tools=self.prompt["tools"],
-            #temperature=0
-        )
-        return result.choices[0].message.content
+        if model == "openai":
+            result = self.model.chat.completions.create(
+                model=self.llm_model,
+                messages=messages
+                #tools=self.prompt["tools"],
+                #temperature=0
+            )
+            return result.choices[0].message.content
+        else:
+            messages=[
+                {"role": "Tu es un assistant"},
+                {"role": "user", "content": f" tu es un {self.role} ; context: {self.context} ; task: {message} reasoning: {self.reasoning}"}
+            ]
+
+            message = f"""
+            [role]
+             {self.role}
+            [contexte strict] 
+            {self.context}
+            [objectif]
+            respondre à la question : {message}
+            
+            [ CONTRAINTES ]
+            - Ne pas utiliser d’informations extérieures au contexte.
+            - Si la réponse est impossible avec le contexte fourni, répondre uniquement : "Information non disponible dans le contexte."
+            - Réponse en texte brut
+                        """
+            return self.send_mistral("user",message,"mistral")
+
+    def rag(self, question):
+        context = self.find_similarity(question)
+        self.set_context(context)
+        self.set_task(f"répond à la question suivante en utilisant uniquement le contexte: {question}")
+        print(self.ask(self.task))
 
     def build_system_message(self, content: str) -> Dict[str, str]:
         return {"role": "system", "content": content}
@@ -152,3 +252,47 @@ class model():
         self.prompt = prompt
 
         return prompt
+
+    def test_llm_server(self):
+        try:
+            response = requests.get("http://localhost:11434/api/tags", timeout=2)
+            print(response.status_code)
+            if response.status_code == 200:
+                return True
+            else:
+                return False
+        except requests.exceptions.RequestException:
+            return False
+
+    def send_mistral(self,user , question , model_name="mistral", contexte = None, api_key=None):
+        print(self.test_llm_server())
+        try:
+            if model_name.lower() == "mistral":
+                response = requests.post(
+                    "http://localhost:11434/api/generate",
+                    json={
+                        "model": model_name,
+                        "prompt": f"""
+                                  
+                                  {question}  
+                        
+                                  """,
+                        "stream": False
+                    },
+                    #timeout=30  # Sécurité : éviter que ça tourne en boucle
+                )
+                response.raise_for_status()
+                #debug = response.json()
+                print(response.json().get("response", "").strip())
+                return response.json().get("response", "").strip()
+
+            else:
+                raise ValueError(f"Modèle non pris en charge : {model_name}")
+
+        except requests.exceptions.RequestException as e:
+            print(f"Erreur réseau avec le modèle local : {e}")
+        except Exception as e:
+            print(f"Erreur inattendue : {e}")
+
+        return ""
+

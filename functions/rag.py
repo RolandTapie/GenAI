@@ -3,20 +3,84 @@ import numpy as np
 from pdfminer.high_level import extract_text
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
-from transformers import AutoTokenizer, AutoModelForCausalLM
-import torch
+from docling.document_converter import DocumentConverter
+from transformers import AutoTokenizer
+
+from docling.chunking import HybridChunker
 import openai
 import requests
 import re
+from langchain_openai import OpenAIEmbeddings
+from langchain_chroma import Chroma
+from llm import model
+
+
+class RagModel():
+    def __init__(self, doc_path,llm="openai", embedding_model="text-embedding-3-small"):
+        self.vectors_db=None
+        if llm=="Mistral":
+            self.model=r"C:\Users\tallar\Documents\PROJETS\GenAI\LLM_Model\Embedding\models--sentence-transformers--all-MiniLM-L6-v2"
+        else:
+            self.model = model(llm)
+        self.embedding_model=embedding_model
+        self.document_path = doc_path
+        self.local_embedding=llm
+        self.local_embeddings=None
+        self.local_model=llm
+        self.paragraphs=None
+        self.embeddings()
+
+    def docling_extraction(self,document):
+        #hf_tokenizer = AutoTokenizer.from_pretrained(self.model)
+        converter = DocumentConverter()
+        result = converter.convert(document)
+        doc=result.document.export_to_text()
+
+        return doc
+
+    def extract_paragraphs(self, document):
+        #text = extract_text(document)
+        text = self.docling_extraction(document)
+        #raw_paragraphs = text.split('\n\n')
+        text = re.sub(r'-\n', '', text)
+        text = re.sub(r'\n', '', text)
+        raw_paragraphs = text.split('.')
+        return [p.strip().replace('\n', ' ') for p in raw_paragraphs if len(p.strip()) > 40]
+
+    def embeddings(self):
+        if self.local_embedding == "Mistral":
+            self.paragraphs=self.extract_paragraphs(self.document_path)
+            self.local_mistral_embeddings(self.paragraphs)
+
+        elif self.local_embedding == "openai":
+            embeddings_model = OpenAIEmbeddings(model=self.embedding_model,api_key=self.model.api_key)  # ou "text-embedding-3-large"
+            # 2. Creer une base vectorielle (ici Chroma en mémoire)
+            db = Chroma(collection_name="documents", embedding_function=embeddings_model)
+            # 3. Ajouter des documents
+            chunks = self.extract_paragraphs()
+            db.add_texts(chunks)
+            self.vectors_db = db
+
+    def local_mistral_embeddings(self,paragraphs):
+        """
+            Fonction pour générer des embeddings avec Mistral local.
+            texts : list[str]
+            retourne : list[list[float]]
+            """
+        self.local_model= SentenceTransformer(self.model)
+        self.local_embeddings = self.local_model.encode(paragraphs, normalize_embeddings=True)
+
+    def rag_query(self,query):
+        if self.local_embedding == "Mistral":
+            query_embedding = self.local_model.encode([query], normalize_embeddings=True)
+            similarities = cosine_similarity(query_embedding, self.local_embeddings).flatten()
+            top_k_indices = np.argsort(similarities)[-5:][::-1]
+            return [self.paragraphs[i-1] + ";" +self.paragraphs[i] + ";" +self.paragraphs[i+1] for i in top_k_indices]
+        else:
+            return self.vectors_db.similarity_search(query, k=5)
 
 # === 1. Extraction du texte du PDF ===
-def extract_paragraphs(pdf_path):
-    text = extract_text(pdf_path)
-    #raw_paragraphs = text.split('\n\n')
-    text = re.sub(r'-\n', '', text)
-    text = re.sub(r'\n', '', text)
-    raw_paragraphs = text.split('.')
-    return [p.strip().replace('\n', ' ') for p in raw_paragraphs if len(p.strip()) > 40]
+
 
 # === 2. Encodage avec SentenceTransformer ===
 def encode_chunks(chunks, model):
@@ -45,8 +109,7 @@ def reformulation(question, nombre, model_name="mistral"):
         """
     return send_prompt(prompt,model_name)
 
-import requests
-import openai
+
 
 def send_prompt(prompt, model_name="mistral", api_key=None):
     print(test_llm_server())
@@ -89,7 +152,7 @@ def send_prompt(prompt, model_name="mistral", api_key=None):
 
     return ""
 
-def send_mistral(user , question , model_name="mistral", api_key=None):
+def send_mistral(user , question , model_name="mistral", contexte = None, api_key=None):
     print(test_llm_server())
     try:
         if model_name.lower() == "mistral":
@@ -98,9 +161,12 @@ def send_mistral(user , question , model_name="mistral", api_key=None):
                 json={
                     "model": model_name,
                     "prompt": f"""
-                              Tu es un assistant expert.
-                              Question :
+                              role: Tu es un assistant expert.
+                              Contexte: {contexte}
+                              Question : reponds à la question ci-dessous en utilisant exclusivement le contexte
                               {question}  
+                              
+                              
                               """,
                     "stream": False
                 },
