@@ -33,7 +33,7 @@ if "gen_model" not in st.session_state:
 gen_model = st.session_state.gen_model
 #rag = st.session_state.rag
 
-st.set_page_config(page_title="Chatbot RAG - Ville de Liège", page_icon="💬", layout="centered")
+st.set_page_config(page_title="Chatbot RAG - Ville de Liège ", page_icon="💬", layout="centered")
 
 CSS = """
 <style>
