@@ -20,8 +20,6 @@ class model():
         self.gemini_key= None
         self.openai_model= None
         self.gemini_model= None
-        self.base_url_openai=""
-        self.base_url_gemini=""
         self.prompt=None
         self.embeddings= None
         self.documents=None
@@ -39,6 +37,7 @@ class model():
 
         self.set_gemini_key(gemini_api_key)
         self.set_gemini_model("gemini-2.5-flash")
+        self.set_gemini_base_url("https://generativelanguage.googleapis.com/v1beta")
 
         self.init_model()
 
@@ -124,7 +123,8 @@ class model():
             {"role": "system", "content": "Tu es un assistant"},
             {"role": "user", "content": f" tu es un {self.role} ; context: {self.context} ; task: {message} reasoning: {self.reasoning}"}
         ]
-        if model == "openai":
+        print(f"Préparation de la réponse avec {model}")
+        if (model == "openai") | (model == "gemini"):
             result = self.model.chat.completions.create(
                 model=self.llm_model,
                 messages=messages

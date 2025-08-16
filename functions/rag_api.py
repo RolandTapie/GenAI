@@ -16,7 +16,12 @@ class QueryRequest(BaseModel):
     query: str
 
 
-document = r"C:\Users\tallar\Downloads\Famille bamendjou de liege-20250801T201343Z-1-001\Famille bamendjou de liege\ARESBAL_ ROI et statut.pdf"
+from dotenv import load_dotenv
+import os
+load_dotenv()
+document= os.getenv("business_file")
+
+print(f"chargement du fichier: \n {document}")
 
 def load_document(document: str):
     global rag_instance

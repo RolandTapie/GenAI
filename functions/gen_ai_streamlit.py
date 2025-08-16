@@ -6,8 +6,12 @@ import requests
 
 from llm import model
 from rag import RagModel
+modele="Mistral"
 
-document= r"C:\Users\tallar\Downloads\Famille bamendjou de liege-20250801T201343Z-1-001\Famille bamendjou de liege\ARESBAL_ ROI et statut.pdf"
+from dotenv import load_dotenv
+import os
+load_dotenv()
+document= os.getenv("business_file")
 
 def rag_api(host,port,root,question):
     print(f"http://{host}:{port}/{root}?request={question}")
@@ -18,7 +22,7 @@ def rag_api(host,port,root,question):
 # --- Initialisation unique des modèles ---
 if "gen_model" not in st.session_state:
     with st.spinner("Initialisation du modèle génératif..."):
-        st.session_state.gen_model = model("openai")
+        st.session_state.gen_model = model(modele)
     st.success("Modèle génératif ✅")
 
 # if "rag" not in st.session_state:
@@ -33,7 +37,7 @@ if "gen_model" not in st.session_state:
 gen_model = st.session_state.gen_model
 #rag = st.session_state.rag
 
-st.set_page_config(page_title="Chatbot RAG - Ville de Liège ", page_icon="💬", layout="centered")
+st.set_page_config(page_title="Chatbot RAG", page_icon="💬", layout="centered")
 
 CSS = """
 <style>
@@ -145,6 +149,7 @@ def render_chat_html(messages):
     """Construit un unique bloc HTML pour la zone de chat."""
     html_parts = []
     html_parts.append("<div class='chat-wrapper'>")
+    html_parts.append(f"<div class='chat-header'><h2 style='margin:6px 0 0 0;'>{modele}</h2>")
     html_parts.append(f"<div class='chat-header'><h2 style='margin:6px 0 0 0;'>💬 Chatbot RAG - {document}Frontend</h2>")
     html_parts.append("<div style='color:rgba(255,255,255,0.9); font-size:14px;'>Prototype (sans LLM) — réponses = question pour tests</div></div>")
     html_parts.append("<div class='chat-area'>")
@@ -188,7 +193,7 @@ with st.form(key="chat_form", clear_on_submit=True):
             context = rag_api("localhost",8000,"/query",query)
             print(context)
             gen_model.set_context(context)
-        st.session_state.messages.append({"role": "bot", "content": gen_model.ask(query,"Mistral")})
+        st.session_state.messages.append({"role": "bot", "content": gen_model.ask(query,modele)})
         # relancer pour rafraîchir (nouvelle méthode)
         st.rerun()
 
