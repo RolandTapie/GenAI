@@ -6,7 +6,7 @@ import requests
 
 from llm import model
 from rag import RagModel
-modele="Mistral"
+modele="gemini"
 
 from dotenv import load_dotenv
 import os

@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 import os
 import numpy as np
 import faiss
+import json
 
 load_dotenv()
 openai_api_key = os.getenv("openai_key")
@@ -68,6 +69,7 @@ class model():
         self.task=task
 
     def init_model(self):
+        self.role="Tu es un assistant ia"
         #self.model_name=="openai":
         self.model=OpenAI(api_key=openai_api_key,base_url=self.openai_base_url)
         self.llm_model=self.openai_model
@@ -119,39 +121,21 @@ class model():
         return results
 
     def ask(self, message, model="openai"):
-        messages=[
-            {"role": "system", "content": "Tu es un assistant"},
-            {"role": "user", "content": f" tu es un {self.role} ; context: {self.context} ; task: {message} reasoning: {self.reasoning}"}
-        ]
+        prompt=Prompt(self.role,self.context,message)
         print(f"Préparation de la réponse avec {model}")
         if (model == "openai") | (model == "gemini"):
             result = self.model.chat.completions.create(
                 model=self.llm_model,
-                messages=messages
-                #tools=self.prompt["tools"],
-                #temperature=0
+                messages=prompt.openai()
             )
             return result.choices[0].message.content
         else:
-            messages=[
-                {"role": "Tu es un assistant"},
-                {"role": "user", "content": f" tu es un {self.role} ; context: {self.context} ; task: {message} reasoning: {self.reasoning}"}
-            ]
-
-            message = f"""
-            [role]
-             {self.role}
-            [contexte strict] 
-            {self.context}
-            [objectif]
-            respondre à la question : {message}
-            
-            [ CONTRAINTES ]
-            - Ne pas utiliser d’informations extérieures au contexte.
-            - Si la réponse est impossible avec le contexte fourni, répondre uniquement : "Information non disponible dans le contexte."
-            - Réponse en texte brut
-                        """
-            return self.send_mistral("user",message,"mistral")
+            prompt = prompt.mistral()
+            response = requests.post(
+                "http://localhost:11434/api/generate", json=prompt,
+            )
+            response.raise_for_status()
+            return response.json().get("response", "").strip()
 
     def rag(self, question):
         context = self.find_similarity(question)
@@ -264,21 +248,13 @@ class model():
         except requests.exceptions.RequestException:
             return False
 
-    def send_mistral(self,user , question , model_name="mistral", contexte = None, api_key=None):
+    def send_mistral(self,user , prompt , model_name="mistral", contexte = None, api_key=None):
         print(self.test_llm_server())
         try:
             if model_name.lower() == "mistral":
+                print(prompt)
                 response = requests.post(
-                    "http://localhost:11434/api/generate",
-                    json={
-                        "model": model_name,
-                        "prompt": f"""
-                                  
-                                  {question}  
-                        
-                                  """,
-                        "stream": False
-                    },
+                    "http://localhost:11434/api/generate", json=prompt,
                     #timeout=30  # Sécurité : éviter que ça tourne en boucle
                 )
                 response.raise_for_status()
@@ -296,3 +272,49 @@ class model():
 
         return ""
 
+class Prompt():
+    def __init__(self,role,context,question,tools=None,temperature=0.7, max_tokens=500, stream=True):
+        self.role=role
+        self.context=context
+        self.question=question
+        self.tools=tools
+        self.temperature=temperature
+        self.max_tokens=max_tokens
+        self.top_p=None
+        self.stream=stream
+
+    def openai(self):
+        prompt=[
+            {"role": "system", "content": "Tu es un assistant"},
+            {"role": "user", "content": f" tu es un {self.role} ; context: {self.context} ; task: {self.question} reasoning:"" "}
+        ]
+        return prompt
+
+    def gemini(self):
+        prompt=[
+            {"role": "system", "content": "Tu es un assistant"},
+            {"role": "user", "content": f" tu es un {self.role} ; context: {self.context} ; task: {self.question} reasoning:"" "}
+        ]
+        return prompt
+
+    def mistral(self):
+
+        prompt = {
+            "model": "mistral",
+            "prompt": f"""
+                        [Role]
+                        {self.role}
+
+                        [Contexte strict]
+                        {self.context}
+                        [Objectif]
+                        Répondre à la question : {self.question}
+
+                        [Contraintes]
+                        -Répondre en une ligne
+                        -utiliser uniquement les informations du contexte
+
+                        """,
+            "stream":False}
+
+        return prompt
