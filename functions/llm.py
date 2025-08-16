@@ -8,6 +8,8 @@ import numpy as np
 import faiss
 import json
 
+from dotenv import load_dotenv
+import os
 load_dotenv()
 openai_api_key = os.getenv("openai_key")
 gemini_api_key = os.getenv("gemini_key")

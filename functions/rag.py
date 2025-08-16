@@ -13,6 +13,7 @@ import re
 from langchain_openai import OpenAIEmbeddings
 from langchain_chroma import Chroma
 from llm import model
+from vector_db import ChromaEmbedding
 
 
 class RagModel():
@@ -28,6 +29,9 @@ class RagModel():
         self.local_embeddings=None
         self.local_model=llm
         self.paragraphs=None
+        if self.local_model == "Mistral":
+            self.vectors_db = ChromaEmbedding("rag",True)
+            self.vectors_db.create_collection("docs")
         self.embeddings()
 
     def docling_extraction(self,document):
@@ -50,12 +54,13 @@ class RagModel():
     def embeddings(self):
         if self.local_embedding == "Mistral":
             self.paragraphs=self.extract_paragraphs(self.document_path)
-            self.local_mistral_embeddings(self.paragraphs)
+            self.vectors_db.add_to_collection(self.paragraphs)
+            #self.local_mistral_embeddings(self.paragraphs)
 
         elif self.local_embedding == "openai":
             embeddings_model = OpenAIEmbeddings(model=self.embedding_model,api_key=self.model.api_key)  # ou "text-embedding-3-large"
             # 2. Creer une base vectorielle (ici Chroma en mémoire)
-            db = Chroma(collection_name="documents", embedding_function=embeddings_model)
+            db = Chroma(collection_name="documents", embedding_function=embeddings_model,persist_directory="./vectordb")
             # 3. Ajouter des documents
             chunks = self.extract_paragraphs()
             db.add_texts(chunks)
@@ -72,10 +77,12 @@ class RagModel():
 
     def rag_query(self,query):
         if self.local_embedding == "Mistral":
-            query_embedding = self.local_model.encode([query], normalize_embeddings=True)
-            similarities = cosine_similarity(query_embedding, self.local_embeddings).flatten()
-            top_k_indices = np.argsort(similarities)[-5:][::-1]
-            return [self.paragraphs[i-1] + ";" +self.paragraphs[i] + ";" +self.paragraphs[i+1] for i in top_k_indices]
+            print(f"la question est : {query}")
+            return self.vectors_db.query(query)
+            # query_embedding = self.local_model.encode([query], normalize_embeddings=True)
+            # similarities = cosine_similarity(query_embedding, self.local_embeddings).flatten()
+            # top_k_indices = np.argsort(similarities)[-5:][::-1]
+            # return [self.paragraphs[i-1] + ";" +self.paragraphs[i] + ";" +self.paragraphs[i+1] for i in top_k_indices]
         else:
             return self.vectors_db.similarity_search(query, k=5)
 
