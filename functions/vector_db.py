@@ -30,18 +30,25 @@ class ChromaEmbedding(InterfaceEmbedding):
         self.limit=limit
 
     def create_collection(self,collection_name):
-        collection = self.client.get_or_create_collection(name=self.vector_model)
-        self.collection =  collection
+        pass
 
     def embed_texts(self,texts):
         return self.embedding_model.transform(texts)
 
     def add_to_collection(self, texts):
-        self.collection.add(
-        documents=texts,
-        embeddings=self.embed_texts(texts),
-        ids=[str(i) for i in range(len(texts))]
-        )
+        try:
+            self.collection = self.client.get_collection(name=self.vector_model)
+            print("La collection existe")
+        except Exception:
+            collection = self.client.get_or_create_collection(name=self.vector_model)
+            self.collection =  collection
+            print("La collection n'existe pas")
+
+            self.collection.add(
+            documents=texts,
+            embeddings=self.embed_texts(texts),
+            ids=[str(i) for i in range(len(texts))]
+            )
 
     def query(self,query):
 
