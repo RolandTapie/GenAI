@@ -27,7 +27,7 @@ def load_document(document: str):
     global rag_instance
 
     # Init du modèle
-    rag_instance = RagModel(document,"Mistral","text-embedding-3-small")
+    rag_instance = RagModel(document,"all-MiniLM-L6-v2")
 
     return {"status": "Document chargé et embeddings créés", "filename": document}
 
