@@ -4,21 +4,15 @@ import html as pyhtml
 import requests
 
 
-from llm import model
-from tools_calls import list_of_tools
+from src.services.llm_generation.llm import model
+#from src.services.RAG.rag import RagModel
 
-from rag import RagModel
-modele="openai"
+modele="gemini"
 
 from dotenv import load_dotenv
 import os
 load_dotenv()
 document= os.getenv("business_file")
-
-tools_path = os.getenv("tools")
-tools_lists = list_of_tools(tools_path)
-
-
 
 def rag_api(host,port,root,question):
     print(f"http://{host}:{port}/{root}?request={question}")
@@ -148,7 +142,7 @@ st.markdown(CSS, unsafe_allow_html=True)
 # --- Session state pour l'historique
 if "messages" not in st.session_state:
     st.session_state.messages = [
-        {"role": "bot", "content": "Bonjour 👋 — je suis LUZ, votre intelligence artificielle, comment puis je vous aider?"}
+        {"role": "bot", "content": "Bonjour 👋 — je suis un chatbot, comment puis je vous aider?"}
     ]
 
 
@@ -157,7 +151,7 @@ def render_chat_html(messages):
     html_parts = []
     html_parts.append("<div class='chat-wrapper'>")
     html_parts.append(f"<div class='chat-header'><h2 style='margin:6px 0 0 0;'>{modele}</h2>")
-    html_parts.append(f"<div class='chat-header'><h2 style='margin:6px 0 0 0;'>💬 LUZ </h2>")
+    html_parts.append(f"<div class='chat-header'><h2 style='margin:6px 0 0 0;'>💬 Chatbot RAG - {document}Frontend</h2>")
     html_parts.append("<div style='color:rgba(255,255,255,0.9); font-size:14px;'>Prototype (sans LLM) — réponses = question pour tests</div></div>")
     html_parts.append("<div class='chat-area'>")
 
@@ -197,15 +191,10 @@ with st.form(key="chat_form", clear_on_submit=True):
         # Simuler réponse identique à la question (pour test)
         with st.spinner("Le bot réfléchit... 🧠💭"):
             query=user_input.strip()
-            #context= rag_api("localhost",8000,"/query",query)
-            context=""
-            source = document
-            source=""
-            print("contexte:")
+            context = rag_api("localhost",8000,"/query",query)
             print(context)
             gen_model.set_context(context)
-            #gen_model.set_context(tools_lists)
-        st.session_state.messages.append({"role": "bot", "content": gen_model.ask(source,query,modele,tools_lists)})
+        st.session_state.messages.append({"role": "bot", "content": gen_model.ask(query,modele)})
         # relancer pour rafraîchir (nouvelle méthode)
         st.rerun()
 

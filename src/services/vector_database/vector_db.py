@@ -2,7 +2,7 @@ from dotenv import load_dotenv
 import os
 from abc import ABC
 from sentence_transformers import SentenceTransformer
-from vectorization import Vectorization
+from src.services.vectorization.vectorization import Vectorization
 import chromadb
 load_dotenv()
 model=os.getenv("model_path")
@@ -14,10 +14,13 @@ class InterfaceEmbedding(ABC):
     def embed_texts(self,texts):
         pass
 
-    def add_to_collection(self, texts):
+    def add_to_collection(self, texts, metadata):
         pass
 
     def query(self,query):
+        pass
+
+    def get_client(self):
         pass
 
 class ChromaEmbedding(InterfaceEmbedding):
@@ -35,7 +38,11 @@ class ChromaEmbedding(InterfaceEmbedding):
     def embed_texts(self,texts):
         return self.embedding_model.transform(texts)
 
-    def add_to_collection(self, texts):
+    def get_client(self):
+        return self.client
+
+    def add_to_collection(self, texts, metadata):
+        metadata = [{'source':f'metadata{i}','auteur': 'auteur', 'type': 'types'} for i, text in enumerate(texts)]
         collection_name=self.vector_model
         try:
             # Essaye de récupérer la collection
@@ -47,31 +54,31 @@ class ChromaEmbedding(InterfaceEmbedding):
             print(f"Collection '{collection_name}' supprimée ❌")
 
             print("Création d'une nouvelle collection")
-            collection = self.client.get_or_create_collection(name=collection_name)
+            collection = self.client.get_or_create_collection(name=collection_name,metadata={"hnsw:space": "cosine"})
             self.collection =  collection
-            self.collection.add(documents=texts,embeddings=self.embed_texts(texts),ids=[str(i) for i in range(len(texts))])
+            self.collection.add(documents=texts,embeddings=self.embed_texts(texts),metadatas= metadata,ids=[str(i) for i in range(len(texts))])
         except Exception as e:
 
             print(f"La collection '{collection_name}' n'existe pas.")
             print("Création d'une nouvelle collection")
-            collection = self.client.get_or_create_collection(name=collection_name)
+            collection = self.client.get_or_create_collection(name=collection_name,metadata={"hnsw:space": "cosine"})
             self.collection =  collection
 
-            self.collection.add(documents=texts,embeddings=self.embed_texts(texts),ids=[str(i) for i in range(len(texts))])
-        #
-        # try:
-        #     self.collection = self.client.get_collection(name=collection_name)
-        #     print("La collection existe")
-        # except Exception:
-        #     collection = self.client.get_or_create_collection(name=collection_name)
-        #     self.collection =  collection
-        #     print("La collection n'existe pas")
-        #
-        #     self.collection.add(
-        #     documents=texts,
-        #     embeddings=self.embed_texts(texts),
-        #     ids=[str(i) for i in range(len(texts))]
-        #     )
+            self.collection.add(documents=texts,embeddings=self.embed_texts(texts),metadatas= metadata,ids=[str(i) for i in range(len(texts))])
+    #
+    # try:
+    #     self.collection = self.client.get_collection(name=collection_name)
+    #     print("La collection existe")
+    # except Exception:
+    #     collection = self.client.get_or_create_collection(name=collection_name)
+    #     self.collection =  collection
+    #     print("La collection n'existe pas")
+    #
+    #     self.collection.add(
+    #     documents=texts,
+    #     embeddings=self.embed_texts(texts),
+    #     ids=[str(i) for i in range(len(texts))]
+    #     )
 
     def query(self,query):
 
@@ -80,7 +87,19 @@ class ChromaEmbedding(InterfaceEmbedding):
             n_results=self.limit
         )
 
-        final_res= results['documents'][0]
+        final_res = results['documents'][0]
+        meta_res = results['metadatas'][0]
+        print("la cible")
+        k=0
+        for doc,dis,id in zip(results['documents'][0],results['distances'][0],results['ids'][0]):
+            print(k,":",id,":",dis,":",doc)
+            k=k+1
+        # print("la distance")
+        # for dis in results['distances'][0]:
+        #     print(dis)
+        # print("l'indice'")
+        # for id in results['ids'][0]:
+        #     print(id)
 
         if self.context_extend == True:
 
@@ -104,7 +123,7 @@ class ChromaEmbedding(InterfaceEmbedding):
                     final_res.append(document)
                     final_set.add(document)
 
-        return final_res
+        return final_res, meta_res
 
 class FaissEmbedding(InterfaceEmbedding):
     def __init__(self, db_name, context_extend=False,model_path=os.getenv("model_path"), limit=2):
