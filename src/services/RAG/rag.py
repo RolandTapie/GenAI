@@ -8,14 +8,21 @@ import requests
 
 from langchain_openai import OpenAIEmbeddings
 from langchain_chroma import Chroma
+
 from src.services.llm_generation.llm import model
 from src.services.vector_database.vector_db import ChromaEmbedding
 from src.services.extract_documents.document_extraction import DoclingExtractor
 from src.services.vectorization.vectorization import Vectorization
 
 
+def rag_api(host,port,root,question):
+    print(f"http://{host}:{port}/{root}?request={question}")
+    response = requests.post(f"http://{host}:{port}/{root}?request={question}")
+    print(response.text)
+    return response.text
+
 class RagModel():
-    def __init__(self, doc_path,vector_model="all-MiniLM-L6-v2", embedding_model="all-MiniLM-L6-v2",k_retrieves =2):
+    def __init__(self, doc_path,vector_model="all-MiniLM-L6-v2", embedding_model="all-MiniLM-L6-v2"):
         self.vectors_db=None
         self.vector_model = vector_model
         self.embedding_model=embedding_model
@@ -24,20 +31,13 @@ class RagModel():
         self.local_embeddings=None
         self.local_model=vector_model
         self.paragraphs=None
-        self.metadata=None
-        self.limit=k_retrieves
         self.embeddings()
 
     def embeddings(self):
-        self.paragraphs, self.metadata =DoclingExtractor(self.document_path).run()
-        self.vectors_db = ChromaEmbedding(self.vector_model,"rag",True,self.limit)
-        self.vectors_db.create_collection("teletravail")
-        if self.paragraphs == []:
-            raise Exception ("la liste des paragraphes à vectoriser est vide")
-        self.vectors_db.add_to_collection(self.paragraphs, self.metadata)
-
-    def get_db_vector(self):
-        return self.vectors_db
+        self.paragraphs=DoclingExtractor(self.document_path).run()
+        self.vectors_db = ChromaEmbedding(self.vector_model,"rag",True)
+        self.vectors_db.create_collection("docs")
+        self.vectors_db.add_to_collection(self.paragraphs)
 
     def rag_query(self,query):
         print(f"la question est : {query}")

@@ -14,7 +14,7 @@ class InterfaceEmbedding(ABC):
     def embed_texts(self,texts):
         pass
 
-    def add_to_collection(self, texts, metadata):
+    def add_to_collection(self, texts):
         pass
 
     def query(self,query):
@@ -41,7 +41,7 @@ class ChromaEmbedding(InterfaceEmbedding):
     def get_client(self):
         return self.client
 
-    def add_to_collection(self, texts, metadata):
+    def add_to_collection(self, texts):
         metadata = [{'source':f'metadata{i}','auteur': 'auteur', 'type': 'types'} for i, text in enumerate(texts)]
         collection_name=self.vector_model
         try:

@@ -3,12 +3,12 @@ from datetime import datetime
 import html as pyhtml
 import requests
 
+from src.services.llm_generation.llm import model
+from src.services.llm_generation.tools.tools_calls import list_of_tools
+from src.services.RAG.rag import rag_api
 
-from llm import model
-from tools_calls import list_of_tools
 
-from rag import RagModel
-modele="gemini"
+
 
 from dotenv import load_dotenv
 import os
@@ -19,29 +19,10 @@ tools_path = os.getenv("tools")
 tools_lists = list_of_tools(tools_path)
 print(tools_lists)
 
-def rag_api(host,port,root,question):
-    print(f"http://{host}:{port}/{root}?request={question}")
-    response = requests.post(f"http://{host}:{port}/{root}?request={question}")
-    print(response.text)
-    return response.text
 
 # --- Initialisation unique des modèles ---
-if "gen_model" not in st.session_state:
-    with st.spinner("Initialisation du modèle génératif..."):
-        st.session_state.gen_model = model(modele)
-    st.success("Modèle génératif ✅")
 
-# if "rag" not in st.session_state:
-#     with st.spinner("Initialisation du modèle RAG..."):
-#         st.session_state.rag = RagModel(
-#             document,
-#             "Mistral",
-#             "text-embedding-3-small"
-#         )
-#     st.success("Modèle RAG prêt ✅")
 
-gen_model = st.session_state.gen_model
-#rag = st.session_state.rag
 
 st.set_page_config(page_title="Chatbot RAG", page_icon="💬", layout="centered")
 
@@ -144,6 +125,33 @@ CSS = """
 
 st.markdown(CSS, unsafe_allow_html=True)
 
+st.sidebar.subheader("⚙️ Paramètres")
+
+modele = st.sidebar.radio(
+    "Choisir le modèle LLM :",
+    options=["gemini", "openai", "claude", "mistral"],
+    index=0  # par défaut "gemini"
+)
+
+st.session_state.modele = modele
+
+mode_execution = st.sidebar.radio(
+    "Mode d'exécution :",
+    options=["RAG", "Agent"],
+    index=0  # par défaut RAG
+)
+
+st.session_state.mode_execution = mode_execution
+
+if "gen_model" not in st.session_state:
+    with st.spinner("Initialisation du modèle génératif..."):
+        st.session_state.gen_model = model(modele)
+    st.success("Modèle génératif ✅")
+
+
+gen_model = st.session_state.gen_model
+#rag = st.session_state.rag
+
 # --- Session state pour l'historique
 if "messages" not in st.session_state:
     st.session_state.messages = [
@@ -196,8 +204,10 @@ with st.form(key="chat_form", clear_on_submit=True):
         # Simuler réponse identique à la question (pour test)
         with st.spinner("Le bot réfléchit... 🧠💭"):
             query=user_input.strip()
-            #context= rag_api("localhost",8000,"/query",query)
-            context=""
+            if mode_execution == "RAG":
+                context= rag_api("localhost",8000,"/query",query)
+            else:
+                context=""
             source = document
             source=""
             print("contexte:")

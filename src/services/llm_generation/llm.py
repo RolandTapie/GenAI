@@ -1,19 +1,21 @@
-from typing import List, Dict, Optional
+from typing import Optional
 from typing import List, Dict, Any
 from openai import OpenAI
-import requests
+import anthropic
 
+from src.services.llm_generation.tools.tools_calls import functions_calls
+
+import requests
 import numpy as np
 import faiss
-
-
 from dotenv import load_dotenv
 import os
 load_dotenv()
 openai_api_key = os.getenv("openai_key")
 gemini_api_key = os.getenv("gemini_key")
+claude_api_key = os.getenv("claude_key")
+tools_path = os.getenv("tools")
 
-import json
 
 class model():
     def __init__(self, model_name):
@@ -42,6 +44,10 @@ class model():
         self.set_gemini_model("gemini-2.5-flash")
         self.set_gemini_base_url("https://generativelanguage.googleapis.com/v1beta")
 
+        self.set_claude_key(claude_api_key)
+        self.set_claude_model("claude-opus-4-20250514")
+        self.set_claude_base_url("https://api.anthropic.com/v1/")
+
         self.init_model()
 
     def set_document(self, document):
@@ -49,20 +55,30 @@ class model():
     def set_openai_key (self,key: str):
         self.openai_key=key
 
-    def set_gemini_key (self,key: str):
-        self.gemini_key=key
-
     def set_openai_model (self,model: str):
-            self.openai_model=model
-
-    def set_gemini_model (self,model: str):
-        self.gemini_model=model
+        self.openai_model=model
 
     def set_openai_base_url(self, url: str):
         self.openai_base_url = url
 
+
+    def set_gemini_key (self,key: str):
+        self.gemini_key=key
+
+    def set_gemini_model (self,model: str):
+        self.gemini_model=model
+
     def set_gemini_base_url(self, url: str):
         self.gemini_base_url = url
+
+    def set_claude_key (self,key: str):
+        self.claude_key=key
+
+    def set_claude_model (self,model: str):
+        self.claude_model=model
+
+    def set_claude_base_url(self, url: str):
+        self.claude_base_url = url
 
     def set_context(self, context: str):
         self.context = context
@@ -70,16 +86,21 @@ class model():
     def set_task(self, task: str):
         self.task=task
 
+    def set_source(self,source):
+        self.source=source
+
     def init_model(self):
         self.role="Tu es un assistant ia"
-        #self.model_name=="openai":
-        self.model=OpenAI(api_key=openai_api_key,base_url=self.openai_base_url)
-        self.llm_model=self.openai_model
-        self.api_key = self.openai_key
-        if self.model_name=="gemini":
-            self.model=OpenAI(api_key=gemini_api_key,base_url=self.gemini_base_url)
-            self.llm_model=self.gemini_model
-            self.api_key = self.gemini_key
+
+        if (self.model_name=="openai") | (self.model_name=="gemini"):
+            self.model=OpenAI(api_key=openai_api_key,base_url=self.openai_base_url)
+            self.llm_model=self.openai_model
+            self.api_key = self.openai_key
+
+        if self.model_name=="claude":
+            self.model=anthropic.Anthropic(api_key=claude_api_key)
+            self.llm_model=self.claude_model
+            self.api_key = self.claude_key
 
     def decouper_en_chunks(self,texte, taille_max=500, overlap=50):
         """
@@ -122,15 +143,41 @@ class model():
             results.append(self.documents[idx])
         return results
 
-    def ask(self, message, model="openai"):
-        prompt=Prompt(self.role,self.context,message)
+    def ask(self, source,message, model="openai",tools=None):
+        k=0
+        prompt=Prompt(self.role,self.context,source,message,)
         print(f"Préparation de la réponse avec {model}")
         if (model == "openai") | (model == "gemini"):
             result = self.model.chat.completions.create(
                 model=self.llm_model,
-                messages=prompt.openai()
+                messages=prompt.openai(),
+                tools = tools
             )
-            return result.choices[0].message.content
+            print(result)
+            if result.choices[0].message.content:
+                return result.choices[0].message.content
+            elif result.choices[0].message.tool_calls:
+                while result.choices[0].message.tool_calls and k<=5:
+                    print(f"appel de fonction {k}")
+                    k=k+1
+                    calls = functions_calls(result)
+                    print(calls)
+                    result = self.model.chat.completions.create(
+                        model=self.llm_model,
+                        messages=calls,
+                        tools=tools,
+                        temperature=0.2
+                    )
+                return result.choices[0].message.content
+        if model == "claude":
+            result = self.model.messages.create(
+                model=self.llm_model,   # ex: "claude-3-opus-20240229"
+                system="Tu es un assistant",
+                max_tokens=500,
+                messages=prompt.claude()
+            )
+            return result.content[0].text
+
         else:
             prompt = prompt.mistral()
             response = requests.post(
@@ -275,9 +322,10 @@ class model():
         return ""
 
 class Prompt():
-    def __init__(self,role,context,question,tools=None,temperature=0.7, max_tokens=500, stream=True):
+    def __init__(self,role,context,source,question,tools=None,temperature=0.7, max_tokens=500, stream=True):
         self.role=role
         self.context=context
+        self.source=source
         self.question=question
         self.tools=tools
         self.temperature=temperature
@@ -285,9 +333,18 @@ class Prompt():
         self.top_p=None
         self.stream=stream
 
+    def set_question (self, question):
+        self.question=question
+
     def openai(self):
         prompt=[
             {"role": "system", "content": "Tu es un assistant"},
+            {"role": "user", "content": f" tu es un {self.role} ; context: {self.context} ; task: {self.question} reasoning:"" "}
+        ]
+        return prompt
+
+    def claude(self):
+        prompt=[
             {"role": "user", "content": f" tu es un {self.role} ; context: {self.context} ; task: {self.question} reasoning:"" "}
         ]
         return prompt
@@ -311,10 +368,13 @@ class Prompt():
                         {self.context}
                         [Objectif]
                         Répondre à la question : {self.question}
+                        
+                        [source]
+                        la source : {self.source}
 
                         [Contraintes]
                         -Répondre en une ligne
-                        -utiliser uniquement les informations du contexte
+                        -utiliser uniquement les informations du contexte et citer la source de la réponse
 
                         """,
             "stream":False}

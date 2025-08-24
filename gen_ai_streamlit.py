@@ -3,11 +3,10 @@ from datetime import datetime
 import html as pyhtml
 import requests
 
+from src.services.llm_generation.llm import model
+from src.services.llm_generation.tools.tools_calls import list_of_tools
 
-from llm import model
-from tools_calls import list_of_tools
 
-from rag import RagModel
 modele="gemini"
 
 from dotenv import load_dotenv
