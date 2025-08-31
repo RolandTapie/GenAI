@@ -3,8 +3,6 @@ from typing import List, Dict, Any
 from openai import OpenAI
 import anthropic
 
-from src.services.llm_generation.tools.tools_calls import functions_calls
-
 import requests
 import numpy as np
 import faiss
@@ -17,9 +15,13 @@ claude_api_key = os.getenv("claude_key")
 tools_path = os.getenv("tools")
 
 
-class model():
-    def __init__(self, model_name):
-        self.model_name = model_name
+class Agent():
+    def __init__(self, agent_llm, agent_tools, agent_memory):
+        self.model_name = agent_llm
+        self.agent_tools=agent_tools
+        self.agent_memory = agent_memory
+
+        self.tools = self.agent_tools.list_of_tools(tools_path)
         self.openai_key= None
         self.gemini_key= None
         self.openai_model= None
@@ -143,7 +145,8 @@ class model():
             results.append(self.documents[idx])
         return results
 
-    def ask(self, source,message, model="openai",tools=None):
+    def ask(self, source,message, model="openai"):
+        tools=self.tools
         k=0
         prompt=Prompt(self.role,self.context,source,message,)
         print(f"Préparation de la réponse avec {model}")
@@ -160,7 +163,7 @@ class model():
                 while result.choices[0].message.tool_calls and k<=5:
                     print(f"appel de fonction {k}")
                     k=k+1
-                    calls = functions_calls(result)
+                    calls = self.agent_tools.functions_calls(result)
                     print(calls)
                     result = self.model.chat.completions.create(
                         model=self.llm_model,

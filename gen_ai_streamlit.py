@@ -3,20 +3,20 @@ from datetime import datetime
 import html as pyhtml
 import requests
 
-from src.services.llm_generation.llm import model
-from src.services.llm_generation.tools.tools_calls import list_of_tools
+from src.services.llm_generation.llm import Agent
+from src.services.tools.agent_tools import AgentTools
+from src.services.memory.agent_memory import AgentMemory
 
 
 modele="gemini"
+LLM_modele = modele
 
 from dotenv import load_dotenv
 import os
 load_dotenv()
 document= os.getenv("business_file")
 
-tools_path = os.getenv("tools")
-tools_lists = list_of_tools(tools_path)
-print(tools_lists)
+
 
 def rag_api(host,port,root,question):
     print(f"http://{host}:{port}/{root}?request={question}")
@@ -27,7 +27,7 @@ def rag_api(host,port,root,question):
 # --- Initialisation unique des modèles ---
 if "gen_model" not in st.session_state:
     with st.spinner("Initialisation du modèle génératif..."):
-        st.session_state.gen_model = model(modele)
+        st.session_state.ia_agent = Agent(LLM_modele, AgentTools(), AgentMemory())
     st.success("Modèle génératif ✅")
 
 # if "rag" not in st.session_state:
@@ -39,7 +39,7 @@ if "gen_model" not in st.session_state:
 #         )
 #     st.success("Modèle RAG prêt ✅")
 
-gen_model = st.session_state.gen_model
+ia_agent = st.session_state.ia_agent
 #rag = st.session_state.rag
 
 st.set_page_config(page_title="Chatbot RAG", page_icon="💬", layout="centered")
@@ -201,9 +201,9 @@ with st.form(key="chat_form", clear_on_submit=True):
             source=""
             print("contexte:")
             print(context)
-            gen_model.set_context(context)
+            ia_agent.set_context(context)
             #gen_model.set_context(tools_lists)
-        st.session_state.messages.append({"role": "bot", "content": gen_model.ask(source,query,modele,tools_lists)})
+        st.session_state.messages.append({"role": "bot", "content": ia_agent.ask(source,query,modele)})
         # relancer pour rafraîchir (nouvelle méthode)
         st.rerun()
 

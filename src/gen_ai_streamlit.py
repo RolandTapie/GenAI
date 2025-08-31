@@ -4,7 +4,7 @@ import html as pyhtml
 import requests
 
 from src.services.llm_generation.llm import model
-from src.services.llm_generation.tools.tools_calls import list_of_tools
+from src.services.llm_generation.tools.tools_calls import AgentTools
 from src.services.RAG.rag import rag_api
 
 
@@ -15,9 +15,6 @@ import os
 load_dotenv()
 document= os.getenv("business_file")
 
-tools_path = os.getenv("tools")
-tools_lists = list_of_tools(tools_path)
-print(tools_lists)
 
 
 # --- Initialisation unique des modèles ---
@@ -145,7 +142,7 @@ st.session_state.mode_execution = mode_execution
 
 if "gen_model" not in st.session_state:
     with st.spinner("Initialisation du modèle génératif..."):
-        st.session_state.gen_model = model(modele)
+        st.session_state.gen_model = model(modele,AgentTools())
     st.success("Modèle génératif ✅")
 
 
@@ -214,7 +211,7 @@ with st.form(key="chat_form", clear_on_submit=True):
             print(context)
             gen_model.set_context(context)
             #gen_model.set_context(tools_lists)
-        st.session_state.messages.append({"role": "bot", "content": gen_model.ask(source,query,modele,tools_lists)})
+        st.session_state.messages.append({"role": "bot", "content": gen_model.ask(source,query,modele)})
         # relancer pour rafraîchir (nouvelle méthode)
         st.rerun()
 
