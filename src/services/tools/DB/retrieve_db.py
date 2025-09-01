@@ -23,7 +23,7 @@ def format_json(df):
     return formatted
 
 
-def get_data(id: str):
+def f_get_data(id: str):
     """
     :param id: identifiant du redevable
     :return: la liste des créances ou des transactions encore ourvertes

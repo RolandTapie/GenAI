@@ -1,6 +1,6 @@
 import requests
 
-def get_weather(latitude, longitude) -> str:
+def f_get_weather(latitude, longitude) -> str:
     """
     Récupère la météo actuelle en fonction de la latitude et longitude via l'API Open-Meteo.
 

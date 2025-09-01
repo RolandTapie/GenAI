@@ -1,3 +1,6 @@
+import json
+from pprint import pprint
+
 from typing import Optional
 from typing import List, Dict, Any
 from openai import OpenAI
@@ -20,8 +23,14 @@ class Agent():
         self.model_name = agent_llm
         self.agent_tools=agent_tools
         self.agent_memory = agent_memory
+        tools_openai, tools_google = self.agent_tools.list_of_tools(tools_path)
 
-        self.tools = self.agent_tools.list_of_tools(tools_path)
+        if self.model_name=="openai":
+            self.tools = tools_openai
+        elif self.model_name=="gemini":
+            self.tools=tools_google
+
+
         self.openai_key= None
         self.gemini_key= None
         self.openai_model= None
@@ -94,12 +103,17 @@ class Agent():
     def init_model(self):
         self.role="Tu es un assistant ia"
 
-        if (self.model_name=="openai") | (self.model_name=="gemini"):
+        if self.model_name=="openai":
             self.model=OpenAI(api_key=openai_api_key,base_url=self.openai_base_url)
             self.llm_model=self.openai_model
             self.api_key = self.openai_key
 
-        if self.model_name=="claude":
+        elif self.model_name=="gemini":
+            self.model=OpenAI(api_key=self.gemini_key,base_url=self.gemini_base_url)
+            self.llm_model=self.gemini_model
+            self.api_key = self.gemini_key
+
+        elif self.model_name=="claude":
             self.model=anthropic.Anthropic(api_key=claude_api_key)
             self.llm_model=self.claude_model
             self.api_key = self.claude_key
@@ -150,13 +164,13 @@ class Agent():
         k=0
         prompt=Prompt(self.role,self.context,source,message,)
         print(f"Préparation de la réponse avec {model}")
-        if (model == "openai") | (model == "gemini"):
+        if model == "openai":
             result = self.model.chat.completions.create(
                 model=self.llm_model,
                 messages=prompt.openai(),
                 tools = tools
             )
-            print(result)
+            #print(result)
             if result.choices[0].message.content:
                 return result.choices[0].message.content
             elif result.choices[0].message.tool_calls:
@@ -164,7 +178,35 @@ class Agent():
                     print(f"appel de fonction {k}")
                     k=k+1
                     calls = self.agent_tools.functions_calls(result)
-                    print(calls)
+                    result = self.model.chat.completions.create(
+                        model=self.llm_model,
+                        messages=calls,
+                        tools=tools,
+                        temperature=0.2
+                    )
+                    print("----le prompt après appels des fonctions----")
+                    print (calls)
+                return result.choices[0].message.content
+        if model == "gemini":
+            result = self.model.chat.completions.create(
+                model=self.llm_model,
+                messages=prompt.gemini(),
+                tools = tools
+            )
+            #print(result)
+            if result.choices[0].message.content:
+                return result.choices[0].message.content
+            elif result.choices[0].message.tool_calls:
+                while result.choices[0].message.tool_calls and k<=5:
+                    print(f"appel de fonction {k}")
+                    k=k+1
+                    calls = self.agent_tools.functions_calls(result)
+                    print(f"model : {self.model_name}")
+                    print(f"messages :")
+                    pprint(calls)
+                    print(f"tools : {tools}")
+                    print(f"temperature : 0.0")
+
                     result = self.model.chat.completions.create(
                         model=self.llm_model,
                         messages=calls,

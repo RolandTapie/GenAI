@@ -2,10 +2,10 @@ from src.services.RAG.rag import rag_api
 
 def get_rag_response(query: str) -> str :
     """
-    Permet de consulter le RAG et de récupérer les informations.
+    à définir.
 
     Args:
-        query (str): il s'agit de la question à poser au RAG
+        query (str): à définir
 
     Returns:
         str: le contexte pour que llm génère la réponse finale.s

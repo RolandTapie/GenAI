@@ -8,7 +8,7 @@ from src.services.tools.agent_tools import AgentTools
 from src.services.memory.agent_memory import AgentMemory
 
 
-modele="gemini"
+modele="openai"
 LLM_modele = modele
 
 from dotenv import load_dotenv
