@@ -1,4 +1,4 @@
-def get_bank_transaction() -> str:
+def f_get_bank_transaction() -> str:
     """
     Permet de récupérer la liste des transactions bancaires
     Returns:

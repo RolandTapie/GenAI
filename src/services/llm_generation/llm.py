@@ -3,7 +3,10 @@ from pprint import pprint
 
 from typing import Optional
 from typing import List, Dict, Any
+
 from openai import OpenAI
+import google.generativeai as genai
+
 import anthropic
 
 import requests
@@ -109,7 +112,11 @@ class Agent():
             self.api_key = self.openai_key
 
         elif self.model_name=="gemini":
-            self.model=OpenAI(api_key=self.gemini_key,base_url=self.gemini_base_url)
+            genai.configure(api_key=gemini_api_key)
+            self.model=genai.GenerativeModel(
+                model_name=self.gemini_model, # Replace with your actual key
+                tools=self.tools
+            )
             self.llm_model=self.gemini_model
             self.api_key = self.gemini_key
 
@@ -118,102 +125,22 @@ class Agent():
             self.llm_model=self.claude_model
             self.api_key = self.claude_key
 
-    def decouper_en_chunks(self,texte, taille_max=500, overlap=50):
-        """
-        Découpe le texte en morceaux (chunks) avec chevauchement optionnel.
-        - taille_max : taille maximale d'un chunk (en caractères)
-        - overlap : nombre de caractères qui se chevauchent entre deux chunks
-        """
-        chunks = []
-        start = 0
-        while start < len(texte):
-            end = start + taille_max
-            chunk = texte[start:end]
-            chunks.append(chunk)
-            start += taille_max - overlap  # avance avec chevauchement
-        return chunks
-
-    def embedding(self, chunks):
-
-        embeddings=[]
-        for chunck in chunks:
-            resp = self.model.embeddings.create(
-                model="text-embedding-3-small",
-                input=chunck
-            )
-            embeddings.append(resp.data[0].embedding)
-        return np.array(embeddings).astype("float32")
-
-    def Faiss_index(self):
-        dimension = self.embeddings.shape[1]
-        self.index = faiss.IndexFlatL2(dimension)  # L2 = distance euclidienne
-        self.index.add(self.embeddings)
-        print(f"{self.index.ntotal} documents indexés.")
-
-    def find_similarity(self, text):
-        text_emb = self.embedding(text)
-        distances, indices = self.index.search(text_emb, k=5)
-        print("\nRésultats de la recherche :")
-        results=[]
-        for idx, dist in zip(indices[0], distances[0]):
-            results.append(self.documents[idx])
-        return results
 
     def ask(self, source,message, model="openai"):
         tools=self.tools
         k=0
         prompt=Prompt(self.role,self.context,source,message,)
         print(f"Préparation de la réponse avec {model}")
-        if model == "openai":
-            result = self.model.chat.completions.create(
-                model=self.llm_model,
-                messages=prompt.openai(),
-                tools = tools
-            )
-            #print(result)
-            if result.choices[0].message.content:
-                return result.choices[0].message.content
-            elif result.choices[0].message.tool_calls:
-                while result.choices[0].message.tool_calls and k<=5:
-                    print(f"appel de fonction {k}")
-                    k=k+1
-                    calls = self.agent_tools.functions_calls(result)
-                    result = self.model.chat.completions.create(
-                        model=self.llm_model,
-                        messages=calls,
-                        tools=tools,
-                        temperature=0.2
-                    )
-                    print("----le prompt après appels des fonctions----")
-                    print (calls)
-                return result.choices[0].message.content
-        if model == "gemini":
-            result = self.model.chat.completions.create(
-                model=self.llm_model,
-                messages=prompt.gemini(),
-                tools = tools
-            )
-            #print(result)
-            if result.choices[0].message.content:
-                return result.choices[0].message.content
-            elif result.choices[0].message.tool_calls:
-                while result.choices[0].message.tool_calls and k<=5:
-                    print(f"appel de fonction {k}")
-                    k=k+1
-                    calls = self.agent_tools.functions_calls(result)
-                    print(f"model : {self.model_name}")
-                    print(f"messages :")
-                    pprint(calls)
-                    print(f"tools : {tools}")
-                    print(f"temperature : 0.0")
 
-                    result = self.model.chat.completions.create(
-                        model=self.llm_model,
-                        messages=calls,
-                        tools=tools,
-                        temperature=0.2
-                    )
-                return result.choices[0].message.content
+        if model == "openai":
+            prmt = prompt.openai()
+            return prompt.openai_process(self.model,self.llm_model,self.agent_tools,prmt,self.tools)
+
+        if model == "gemini":
+
+            return prompt.gemini_process(self.model,self.agent_tools,message)
+
+
         if model == "claude":
             result = self.model.messages.create(
                 model=self.llm_model,   # ex: "claude-3-opus-20240229"
@@ -231,105 +158,8 @@ class Agent():
             #response.raise_for_status()
             return response.json().get("response", "").strip()
 
-    def rag(self, question):
-        context = self.find_similarity(question)
-        self.set_context(context)
-        self.set_task(f"répond à la question suivante en utilisant uniquement le contexte: {question}")
-        print(self.ask(self.task))
-
-    def build_system_message(self, content: str) -> Dict[str, str]:
-        return {"role": "system", "content": content}
 
 
-    def build_user_message(self, content: str) -> Dict[str, str]:
-        return {"role": "user", "content": content}
-
-
-    def build_prompt(self,
-                     model: str,
-                     system_prompt: str,
-                     user_prompt: Optional[str] = None,
-                     tools: Optional[List[Dict[str, str]]] = None
-                     ) -> List[Dict[str, str]]:
-        """
-        Assemble tous les composants en une liste de messages structurée.
-        """
-        messages = []
-
-        # Ajout du système
-        if system_prompt:
-            messages.append(self.build_system_message(system_prompt))
-
-        # Introduction utilisateur
-        if user_prompt:
-            messages.append(self.build_user_message(user_prompt))
-
-
-        prompt={}
-        prompt["model"]=model
-        prompt["messages"]=messages
-
-        # Outils
-        if tools:
-            prompt["tools"]=tools
-
-        # Message final
-        #messages.append(self.build_user_message(new_user_message))
-
-        self.prompt=prompt
-        return prompt
-
-    def find_function(self, tools: List[Dict[str, Any]], name: str) -> Dict[str, Any]:
-        print(tools)
-        if tools["function"]["name"]=="nom_fonction":
-            print("ok")
-            print(tools["function"]["parameters"])
-
-    def add_parameter(self,schema,function_name, name, types, description,required):
-
-        if schema["function"]["name"]==function_name:
-            schema["function"]["parameters"]["properties"][name] = {
-                "type": types,
-                "description": description
-            }
-
-            if required and name not in schema["function"]["parameters"]["required"]:
-                schema["function"]["parameters"]["required"].append(name)
-
-            return schema
-
-    def create_tool_definition(self,
-                               function_name: str,
-                               description: str,
-                               parameters: dict,
-                               required_fields: list
-                               ) -> dict:
-        return {
-            "type": "function",
-            "function": {
-                "name": function_name,
-                "description": description,
-                "parameters":parameters
-            }
-        }
-
-    def generate_prompt(self,model,system_prompt,user_prompt,fonctions,properties):
-        tools=[]
-        for fonction in fonctions:
-            function_name=fonction
-            function_description="description de la fonction"
-            parametres = {"type": "object","properties": {},"required": []}
-            schema=self.create_tool_definition(function_name,function_description,parametres,"les paramètres requis")
-
-            for propriete in properties:
-                schema = self.add_parameter(schema,fonction,propriete,"string","description"+propriete,"true")
-
-            tools.append(schema)
-        prompt=self.build_prompt(model,system_prompt,user_prompt,tools)
-
-        self.prompt = prompt
-
-        return prompt
 
     def test_llm_server(self):
         try:
@@ -342,29 +172,6 @@ class Agent():
         except requests.exceptions.RequestException:
             return False
 
-    def send_mistral(self,user , prompt , model_name="mistral", contexte = None, api_key=None):
-        print(self.test_llm_server())
-        try:
-            if model_name.lower() == "mistral":
-                print(prompt)
-                response = requests.post(
-                    "http://localhost:11434/api/generate", json=prompt,
-                    #timeout=30  # Sécurité : éviter que ça tourne en boucle
-                )
-                response.raise_for_status()
-                #debug = response.json()
-                print(response.json().get("response", "").strip())
-                return response.json().get("response", "").strip()
-
-            else:
-                raise ValueError(f"Modèle non pris en charge : {model_name}")
-
-        except requests.exceptions.RequestException as e:
-            print(f"Erreur réseau avec le modèle local : {e}")
-        except Exception as e:
-            print(f"Erreur inattendue : {e}")
-
-        return ""
 
 class Prompt():
     def __init__(self,role,context,source,question,tools=None,temperature=0.7, max_tokens=500, stream=True):
@@ -388,6 +195,31 @@ class Prompt():
         ]
         return prompt
 
+    def openai_process(self,model,llm_model,agent_tools,prompt,tools):
+        result = model.chat.completions.create(
+            model=llm_model,
+            messages=prompt,
+            tools = tools
+        )
+        k=1
+        #print(result)
+        if result.choices[0].message.content:
+            return result.choices[0].message.content
+        elif result.choices[0].message.tool_calls:
+            while result.choices[0].message.tool_calls and k<=5:
+                print(f"appel de fonction {k}")
+                k=k+1
+                calls = agent_tools.functions_calls(result)
+                result = model.chat.completions.create(
+                    model=llm_model,
+                    messages=calls,
+                    tools=tools,
+                    temperature=0.2
+                )
+                print("----le prompt après appels des fonctions----")
+                print (calls)
+            return result.choices[0].message.content
+
     def claude(self):
         prompt=[
             {"role": "user", "content": f" tu es un {self.role} ; context: {self.context} ; task: {self.question} reasoning:"" "}
@@ -400,6 +232,69 @@ class Prompt():
             {"role": "user", "content": f" tu es un {self.role} ; context: {self.context} ; task: {self.question} reasoning:"" "}
         ]
         return prompt
+
+    def gemini_process(self,model, agent, message):
+        response = model.generate_content(message)
+        tool_responses=[]
+        # Print the result
+        for part in response.candidates[0].content.parts:
+            # Vérifier si la partie est un appel de fonction
+            if hasattr(part, 'function_call'):
+                tool_call = part.function_call
+
+                # Obtenir le nom de la fonction et ses arguments
+                tool_name = tool_call.name
+                tool_args = tool_call.args
+
+                print(f"Le modèle a demandé d'exécuter la fonction : {tool_name}")
+                print(f"Avec les arguments : {tool_args}")
+                result = agent.use_tool(tool_name,tool_args)
+
+                tool_responses.append(result)
+
+        if tool_responses:
+            print("\n-------------------------------------------------------------")
+            print("Résultat des outils obtenu. On le renvoie au modèle...")
+            print("-------------------------------------------------------------")
+
+            # 1. Créez un objet de contenu pour le message initial de l'utilisateur
+            user_content = genai.protos.Content(
+                parts=[genai.protos.Part(text=message)],
+                role='user'
+            )
+
+            # 2. L'historique de la conversation commence par le message de l'utilisateur...
+            chat_history = [user_content]
+
+            # 3. ...suivi par la réponse du modèle qui contient l'appel de fonction...
+            func_call= genai.protos.Content(parts=[genai.protos.Part(function_call=genai.protos.FunctionCall(name="f_get_bank_transaction",
+                    args={}
+                ))],
+                role="model"
+            )
+            #chat_history.append(response.candidates[0].content)
+            chat_history.append(func_call)
+            # 4. ...suivi par la réponse de l'outil qui contient les résultats.
+            tool_content = genai.protos.Content(
+                parts=[genai.protos.Part(text=tool_responses[0])],
+                role='user'
+            )
+
+
+            chat_history.append(tool_content)
+            print(f"chat_history : {chat_history}")
+
+            # Relancez generate_content avec l'historique complet pour obtenir la réponse finale
+            final_response = model.generate_content(chat_history)
+            print("\n-------------------------------------------------------------")
+            print("Réponse finale du modèle :")
+            print("-------------------------------------------------------------")
+            return final_response.text
+        else:
+            print("\n-------------------------------------------------------------")
+            print("Le modèle a fourni une réponse textuelle directe :")
+            print("-------------------------------------------------------------")
+            return response.text
 
     def mistral(self):
 
@@ -425,3 +320,201 @@ class Prompt():
             "stream":False}
 
         return prompt
+
+
+class Model:
+
+    def __init__(self, model_name, llm_model):
+        self.model_name=model_name
+        self.llm_model=llm_model
+        self.agent_tools=None
+        self.tools_openai=None
+        self.tools_google = None
+        self.memory=None
+
+    def initialize(self,agent_tools,memory):
+        if agent_tools:
+            self.agent_tools=agent_tools
+            self.tools_openai, self.tools_google = self.agent_tools.list_of_tools(tools_path)
+        if memory:
+            self.memory=memory
+
+        if self.model_name=="openai":
+            tools = self.tools_openai
+            self.model=OpenAI(api_key=os.getenv("openai_key"))
+
+        elif self.model_name=="gemini":
+            tools = self.tools_google
+            genai.configure(api_key=os.getenv("gemini_key"))
+            self.model=genai.GenerativeModel(
+                model_name=self.llm_model, # Replace with your actual key
+                tools=tools
+            )
+
+        elif self.model_name=="claude":
+            self.model=anthropic.Anthropic(api_key=os.getenv("claude_key"))
+
+
+    def get_prompt(self,role,context,question):
+        if self.model_name=="openai":
+            prompt=[
+                {"role": "system", "content": "Tu es un assistant"},
+                {"role": "user", "content": f" tu es un {role} ; context: {context} ; task: {question} reasoning:"" "}
+            ]
+
+        elif self.model_name=="gemini":
+            prompt=[
+                {"role": "system", "content": "Tu es un assistant"},
+                {"role": "user", "content": f" tu es un {role} ; context: {context} ; task: {question} reasoning:"" "}
+            ]
+
+        elif self.model_name=="claude":
+            prompt=[
+                {"role": "user", "content": f" tu es un {role} ; context: {context} ; task: {question} reasoning:"" "}
+            ]
+
+        else: #mistral
+            prompt = {
+                "model": "mistral",
+                "prompt": f"""
+                        [Role]
+                        {role}
+
+                        [Contexte strict]
+                        {context}
+                        [Objectif]
+                        Répondre à la question : {question}
+                        
+                        [source]
+                        la source : {self.source}
+
+                        [Contraintes]
+                        -Répondre en une ligne
+                        -utiliser uniquement les informations du contexte et citer la source de la réponse
+
+                        """,
+                "stream":False}
+        return prompt
+
+    def get_model(self):
+        return self.model
+
+    def get_llm_model(self):
+        return self.llm_model
+
+
+    def process(self,user,context,question):
+        prompt=self.get_prompt(user,context,question)
+
+        if self.model_name=="openai":
+            results = self.openai_process(self.model,self.llm_model,self.agent_tools,prompt,self.tools_openai)
+
+        elif self.model_name=="gemini":
+            results = self.gemini_process(self.model,self.agent_tools,question)
+
+        elif self.model_name=="claude":
+            pass
+
+        else:
+            results = self.mistral_process(question)
+
+
+        return results
+
+    def openai_process(self,model,llm_model,agent_tools,prompt,tools):
+        result = model.chat.completions.create(
+            model=llm_model,
+            messages=prompt,
+            tools = tools
+        )
+        k=1
+        #print(result)
+        if result.choices[0].message.content:
+            return result.choices[0].message.content
+        elif result.choices[0].message.tool_calls:
+            while result.choices[0].message.tool_calls and k<=5:
+                print(f"appel de fonction {k}")
+                k=k+1
+                calls = agent_tools.functions_calls(result)
+                result = model.chat.completions.create(
+                    model=llm_model,
+                    messages=calls,
+                    tools=tools,
+                    temperature=0.2
+                )
+                print("----le prompt après appels des fonctions----")
+                print (calls)
+            return result.choices[0].message.content
+
+    def gemini_process(self,model, agent, message):
+
+        #le message doit contenir les tools
+        response = model.generate_content(message)
+        tool_responses=[]
+        # Print the result
+        for part in response.candidates[0].content.parts:
+            # Vérifier si la partie est un appel de fonction
+            if hasattr(part, 'function_call'):
+                tool_call = part.function_call
+
+                # Obtenir le nom de la fonction et ses arguments
+                tool_name = tool_call.name
+                tool_args = tool_call.args
+
+                print(f"Le modèle a demandé d'exécuter la fonction : {tool_name}")
+                print(f"Avec les arguments : {tool_args}")
+                result = agent.use_tool(tool_name,tool_args)
+
+                tool_responses.append(result)
+
+        if tool_responses:
+            print("\n-------------------------------------------------------------")
+            print("Résultat des outils obtenu. On le renvoie au modèle...")
+            print("-------------------------------------------------------------")
+
+            # 1. Créez un objet de contenu pour le message initial de l'utilisateur
+            user_content = genai.protos.Content(
+                parts=[genai.protos.Part(text=message)],
+                role='user'
+            )
+
+            # 2. L'historique de la conversation commence par le message de l'utilisateur...
+            chat_history = [user_content]
+
+            # 3. ...suivi par la réponse du modèle qui contient l'appel de fonction...
+            func_call= genai.protos.Content(parts=[genai.protos.Part(function_call=genai.protos.FunctionCall(name="f_get_bank_transaction",
+                                                                                                             args={}
+                                                                                                             ))],
+                                            role="model"
+                                            )
+            #chat_history.append(response.candidates[0].content)
+            chat_history.append(func_call)
+            # 4. ...suivi par la réponse de l'outil qui contient les résultats.
+            tool_content = genai.protos.Content(
+                parts=[genai.protos.Part(text=tool_responses[0])],
+                role='user'
+            )
+
+
+            chat_history.append(tool_content)
+            print(f"chat_history : {chat_history}")
+
+            # Relancez generate_content avec l'historique complet pour obtenir la réponse finale
+            final_response = model.generate_content(chat_history)
+            print("\n-------------------------------------------------------------")
+            print("Réponse finale du modèle :")
+            print("-------------------------------------------------------------")
+            return final_response.text
+        else:
+            print("\n-------------------------------------------------------------")
+            print("Le modèle a fourni une réponse textuelle directe :")
+            print("-------------------------------------------------------------")
+            return response.text
+
+    def mistral_process(self,question):
+        prompt = self.get_prompt("user","",question)
+        response = requests.post(
+            "http://localhost:11434/api/generate", json=prompt,
+        )
+        #response.raise_for_status()
+        return response.json().get("response", "").strip()
