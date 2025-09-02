@@ -3,13 +3,21 @@ from datetime import datetime
 import html as pyhtml
 import requests
 
-from src.services.llm_generation.llm import Agent
+from src.services.Agent.agent import Agent
+from src.services.llm_generation.llm import Model
 from src.services.tools.agent_tools import AgentTools
 from src.services.memory.agent_memory import AgentMemory
 
 
 modele="gemini"
-LLM_modele = modele
+LLM_modele = "gemini-2.5-flash"
+
+modele="openai"
+LLM_modele ="gpt-4o"
+
+
+model=Model(modele,LLM_modele)
+agent=Agent(model=model,tools=AgentTools(),memory=AgentMemory())
 
 from dotenv import load_dotenv
 import os
@@ -18,16 +26,12 @@ document= os.getenv("business_file")
 
 
 
-def rag_api(host,port,root,question):
-    print(f"http://{host}:{port}/{root}?request={question}")
-    response = requests.post(f"http://{host}:{port}/{root}?request={question}")
-    print(response.text)
-    return response.text
+
 
 # --- Initialisation unique des modèles ---
 if "gen_model" not in st.session_state:
     with st.spinner("Initialisation du modèle génératif..."):
-        st.session_state.ia_agent = Agent(LLM_modele, AgentTools(), AgentMemory())
+        st.session_state.ia_agent = agent
     st.success("Modèle génératif ✅")
 
 # if "rag" not in st.session_state:
@@ -201,9 +205,9 @@ with st.form(key="chat_form", clear_on_submit=True):
             source=""
             print("contexte:")
             print(context)
-            ia_agent.set_context(context)
+            #ia_agent.set_context(context)
             #gen_model.set_context(tools_lists)
-        st.session_state.messages.append({"role": "bot", "content": ia_agent.ask(source,query,modele)})
+        st.session_state.messages.append({"role": "bot", "content": ia_agent.run("","",query)})
         # relancer pour rafraîchir (nouvelle méthode)
         st.rerun()
 

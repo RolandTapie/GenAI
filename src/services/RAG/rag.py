@@ -9,7 +9,7 @@ import requests
 from langchain_openai import OpenAIEmbeddings
 from langchain_chroma import Chroma
 
-from src.services.llm_generation.llm import model
+#from src.services.llm_generation.llm import model
 from src.services.vector_database.vector_db import ChromaEmbedding
 from src.services.extract_documents.document_extraction import DoclingExtractor
 from src.services.vectorization.vectorization import Vectorization

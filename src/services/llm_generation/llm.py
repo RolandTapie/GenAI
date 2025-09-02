@@ -331,6 +331,7 @@ class Model:
         self.tools_openai=None
         self.tools_google = None
         self.memory=None
+        self.context=None
 
     def initialize(self,agent_tools,memory):
         if agent_tools:
