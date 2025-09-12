@@ -9,12 +9,14 @@ from src.services.tools.agent_tools import AgentTools
 from src.services.memory.agent_memory import AgentMemory
 
 
+
+
 modele="gemini"
 LLM_modele = "gemini-2.5-flash"
 
+
 modele="openai"
 LLM_modele ="gpt-4o"
-
 
 print(f"Initialisation du modème {modele} version {LLM_modele}")
 model=Model(modele,LLM_modele)
@@ -36,17 +38,8 @@ if "gen_model" not in st.session_state:
         st.session_state.ia_agent = agent
     st.success("Modèle génératif ✅")
 
-# if "rag" not in st.session_state:
-#     with st.spinner("Initialisation du modèle RAG..."):
-#         st.session_state.rag = RagModel(
-#             document,
-#             "Mistral",
-#             "text-embedding-3-small"
-#         )
-#     st.success("Modèle RAG prêt ✅")
-
 ia_agent = st.session_state.ia_agent
-#rag = st.session_state.rag
+
 
 st.set_page_config(page_title="Chatbot RAG", page_icon="💬", layout="centered")
 

@@ -24,9 +24,7 @@ class QueryRequest(BaseModel):
 from dotenv import load_dotenv
 import os
 load_dotenv()
-document= os.getenv("business_file")
 
-print(f"chargement du fichier: \n {document}")
 
 def load_document(document: str):
     global rag_instance
@@ -40,7 +38,7 @@ def load_document(document: str):
 
     rag_instance = RagModelV2(extractor,vectorizer,embedding)
 
-    return {"status": "Document chargé et embeddings créés", "filename": document}
+    return {"status": "Document chargé et embeddings créés"}
 
 
 @app.post("/query")
@@ -55,5 +53,5 @@ async def query_rag(request: str):
 
 if __name__ == "__main__":
     import uvicorn
-    load_document(document)
+    load_document("")
     uvicorn.run(app, host="0.0.0.0", port=8000)

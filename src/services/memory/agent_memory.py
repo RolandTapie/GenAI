@@ -39,12 +39,12 @@ class AgentMemory():
         """Sauvegarde la mémoire actuelle dans le fichier"""
         with open(self.fichier, "w", encoding="utf-8") as f:
             for entree in self.memoire:
-                f.write(entree + "\n")
+                f.write("\n" + entree + "\n")
 
     def update_memory(self, info: str):
         info = info.replace("\n"," ")
         """Ajoute une nouvelle information avec un horodatage"""
-        entree = f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] {info}"
+        entree = f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] >>>  {info}"
         self.memoire.append(entree)
 
     def get_memories(self):
