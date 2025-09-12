@@ -9,7 +9,6 @@ from src.services.tools.agent_tools import AgentTools
 from src.services.memory.agent_memory import AgentMemory
 
 
-
 modele="gemini"
 LLM_modele = "gemini-2.5-flash"
 
