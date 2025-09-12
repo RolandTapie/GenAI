@@ -3,6 +3,7 @@
 class Agent():
 
     def __init__(self,model, tools,memory):
+        print("Construction de l'agent")
         self.model = model
         self.model.initialize(tools,memory)
 

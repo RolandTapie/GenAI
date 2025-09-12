@@ -14,7 +14,7 @@ class InterfaceEmbedding(ABC):
     def embed_texts(self,texts):
         pass
 
-    def add_to_collection(self, texts):
+    def add_to_collection(self, texts, vectors):
         pass
 
     def query(self,query):
@@ -24,12 +24,10 @@ class InterfaceEmbedding(ABC):
         pass
 
 class ChromaEmbedding(InterfaceEmbedding):
-    def __init__(self,vector_model, db_name, context_extend=False, limit=2):
-        self.embedding_model=Vectorization(vector_model)
-        self.vector_model = vector_model
+    def __init__(self, db_name, context_extend=False, limit=2):
         self.client = chromadb.PersistentClient(path=f"./{db_name}")
         self.context_extend = context_extend
-        self.collection= None
+        self.collection= db_name + "_collection"
         self.limit=limit
 
     def create_collection(self,collection_name):
@@ -41,10 +39,10 @@ class ChromaEmbedding(InterfaceEmbedding):
     def get_client(self):
         return self.client
 
-    def add_to_collection(self, texts):
-        print("les chunks")
+    def add_to_collection(self, texts, vectors):
+        #print("les chunks")
         metadata = [{'source':f'metadata{i}','auteur': 'auteur', 'type': 'types'} for i, text in enumerate(texts)]
-        collection_name=self.vector_model
+        collection_name=self.collection
         try:
             # Essaye de récupérer la collection
             collection = self.client.get_collection(name=collection_name)
@@ -57,11 +55,7 @@ class ChromaEmbedding(InterfaceEmbedding):
             print("Création d'une nouvelle collection")
             collection = self.client.get_or_create_collection(name=collection_name,metadata={"hnsw:space": "cosine"})
             self.collection =  collection
-            emb = self.embed_texts(texts)
-            for t,e in zip(texts,emb):
-                print(t)
-                print(e)
-            self.collection.add(documents=texts,embeddings=emb,metadatas= metadata,ids=[str(i) for i in range(len(texts))])
+            self.collection.add(documents=texts,embeddings=vectors,metadatas= metadata,ids=[str(i) for i in range(len(texts))])
         except Exception as e:
 
             print(f"La collection '{collection_name}' n'existe pas.")
@@ -69,30 +63,12 @@ class ChromaEmbedding(InterfaceEmbedding):
             collection = self.client.get_or_create_collection(name=collection_name,metadata={"hnsw:space": "cosine"})
             self.collection =  collection
 
-            emb = self.embed_texts(texts)
-            for t,e in zip(texts,emb):
-                print(t)
-                print(e)
-            self.collection.add(documents=texts,embeddings=emb,metadatas= metadata,ids=[str(i) for i in range(len(texts))])
-    #
-    # try:
-    #     self.collection = self.client.get_collection(name=collection_name)
-    #     print("La collection existe")
-    # except Exception:
-    #     collection = self.client.get_or_create_collection(name=collection_name)
-    #     self.collection =  collection
-    #     print("La collection n'existe pas")
-    #
-    #     self.collection.add(
-    #     documents=texts,
-    #     embeddings=self.embed_texts(texts),
-    #     ids=[str(i) for i in range(len(texts))]
-    #     )
+            self.collection.add(documents=texts,embeddings=vectors,metadatas= metadata,ids=[str(i) for i in range(len(texts))])
 
     def query(self,query):
 
         results = self.collection.query(
-            query_embeddings=self.embed_texts(query),
+            query_embeddings=query,
             n_results=self.limit
         )
 

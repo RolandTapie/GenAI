@@ -9,6 +9,7 @@ from src.services.tools.agent_tools import AgentTools
 from src.services.memory.agent_memory import AgentMemory
 
 
+
 modele="gemini"
 LLM_modele = "gemini-2.5-flash"
 
@@ -16,8 +17,10 @@ modele="openai"
 LLM_modele ="gpt-4o"
 
 
+print(f"Initialisation du modème {modele} version {LLM_modele}")
 model=Model(modele,LLM_modele)
-agent=Agent(model=model,tools=AgentTools(),memory=AgentMemory())
+print(f"Injection des tools et d'une mémoire")
+agent=Agent(model=model,tools=AgentTools(),memory=AgentMemory("poc","test_memoire.txt"))
 
 from dotenv import load_dotenv
 import os

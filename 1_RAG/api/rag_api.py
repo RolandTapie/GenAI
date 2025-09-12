@@ -3,7 +3,6 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 import os
 from src.services.RAG.rag import RagModel
-from src.services.llm_generation.tools import list_of_tools
 
 tools_path = os.getenv("tools")
 tools_lists = list_of_tools(tools_path)

@@ -6,11 +6,16 @@ from src.services.tools.Bank.bank import *
 from src.services.tools.meetings.meeting import *
 from src.services.tools.weather.weather import *
 from src.services.tools.DB.retrieve_db import *
-#from src.services.tools.Rag_tool.rag_tool import *
+from src.services.tools.Rag_tool.rag_backend import *
 from src.services.tools.News.news import *
 
 
 class AgentTools:
+    def __init__(self):
+        self.tools=[]
+
+    def get_tools(self):
+        return self.tools
 
     def extract_tools(self, filepath: str,tools_openai,tools_google):
         with open(filepath, "r", encoding="utf-8") as f:
@@ -21,7 +26,7 @@ class AgentTools:
                 if "f_" in node.name:
                     func_name = node.name
                     description = ast.get_docstring(node) or "No description available."
-
+                    self.tools.append([func_name,description])
                     # Construire le JSON Schema des paramètres
                     properties = {}
                     required = []
@@ -101,7 +106,7 @@ class AgentTools:
             return(func(**args))
         else:
             #raise Exception (f"la fonction {func_name} n'existe pas dans le contexte globals()")
-            return(f" l'outil de recherche  ")
+            return(f" une erreur :  l'appel au tool ne produit pas de résultat")
         #except Exception as e:
             #return(f"l'appel de la fonction n'a pas fourni de résultat")
 

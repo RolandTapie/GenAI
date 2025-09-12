@@ -7,6 +7,8 @@ from typing import List, Dict, Any
 from openai import OpenAI
 import google.generativeai as genai
 
+from src.services.memory.agent_memory import AgentMemory
+
 import anthropic
 
 import requests
@@ -333,12 +335,19 @@ class Model:
         self.memory=None
         self.context=None
 
-    def initialize(self,agent_tools,memory):
+    def initialize(self,agent_tools,memory:AgentMemory):
         if agent_tools:
+
             self.agent_tools=agent_tools
+            print("l'agent IA dispose des outils ci-dessous :")
             self.tools_openai, self.tools_google = self.agent_tools.list_of_tools(tools_path)
+            liste = [tool for tool in self.agent_tools.get_tools() if 'f_' in tool[0]]
+            for tool in liste:
+                print(tool)
+
         if memory:
             self.memory=memory
+            print(f"l'agent IA dispose d'une mémoire: {self.memory.get_info_memory()} ")
 
         if self.model_name=="openai":
             tools = self.tools_openai
@@ -355,6 +364,7 @@ class Model:
         elif self.model_name=="claude":
             self.model=anthropic.Anthropic(api_key=os.getenv("claude_key"))
 
+        print("l'agent IA est constitué")
 
     def get_prompt(self,role,context,question):
         if self.model_name=="openai":
@@ -419,6 +429,8 @@ class Model:
         else:
             results = self.mistral_process(question)
 
+        self.memory.update_memory(f"question : {question} ; réponse : {results}")
+        self.memory.save_memory()
 
         return results
 
@@ -491,10 +503,10 @@ class Model:
             #chat_history.append(response.candidates[0].content)
             chat_history.append(func_call)
             # 4. ...suivi par la réponse de l'outil qui contient les résultats.
-            tool_content = genai.protos.Content(
-                parts=[genai.protos.Part(text=tool_responses[0])],
-                role='user'
-            )
+            tool_content = {
+                "role": "model",
+                "parts": [{"text": tool_responses[0]}]
+            }
 
 
             chat_history.append(tool_content)

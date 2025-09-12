@@ -5,7 +5,12 @@ import shutil
 import os
 
 # Ton import RagModel
-from src.services.RAG.rag import RagModel # <-- ton fichier contenant la classe RagModel
+from src.services.RAG.extraction.document_extraction import DoclingExtractor
+from src.services.RAG.vectorization.vectorization import Vectorization
+from src.services.RAG.embeddings.db_embeddings import ChromaEmbedding
+from src.services.RAG.rag import RagModelV2
+
+
 
 app = FastAPI(title="RAG API", description="API pour effectuer des requêtes RAG", version="1.0.0")
 
@@ -28,7 +33,12 @@ def load_document(document: str):
 
     # Init du modèle
 
-    rag_instance = RagModel(document,"all-MiniLM-L6-v2")
+    document= os.getenv("business_file")
+    extractor = DoclingExtractor(r"C:\Users\tallar\Documents\PROJETS\GenAI\docs\files\Roland TALLA Data & Finance ENG.pdf","\n")
+    vectorizer = Vectorization("all-MiniLM-L6-v2")
+    embedding = ChromaEmbedding("rag",False,3)
+
+    rag_instance = RagModelV2(extractor,vectorizer,embedding)
 
     return {"status": "Document chargé et embeddings créés", "filename": document}
 

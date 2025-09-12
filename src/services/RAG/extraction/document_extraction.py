@@ -4,14 +4,19 @@ import re
 
 class DoclingExtractor():
 
-    def __init__(self, document_path):
+    def __init__(self, document_path, sep):
         self.document=document_path
         self.doc=None
         self.meta = None
         self.chunker=None
+        self.sep = sep
+
+    def get_document(self):
+        return self.document
+
     def run(self):
         """Réaliser le pipeline de chunckage et de vectorization"""
-        return self.extract_paragraphs(self.document), self.meta
+        return self.extract_paragraphs(self.document, self.sep), self.meta
 
 
 
@@ -21,23 +26,26 @@ class DoclingExtractor():
         converter = DocumentConverter()
         result = converter.convert(document)
         doc=result.document.export_to_text()
-        #print("le document")
+        print("le document")
         #print(doc)
         self.doc=doc
         self.meta="meta test"
         return doc
 
-    def extract_paragraphs(self, document):
+    def extract_paragraphs(self, document, sep):
         """Création des chunks à vectoriser"""
         #text = extract_text(document)
         text = self.docling_extraction(document)
+
         if text != "":
             #raw_paragraphs = text.split('\n\n')
-            text = re.sub(r'-\n', '', text)
-            text = re.sub(r'\n', '', text)
+            #text = re.sub(r'-\n', '', text)
+            #text = re.sub(r'\n', '', text)
             #raw_paragraphs = text.split('.')
-            raw_paragraphs = text.split('\n\n')
-            return [p.strip().replace('\n', ' ') for p in raw_paragraphs if len(p.strip()) > 40]
+            raw_paragraphs = text.split(sep)
+            result = [p.strip().replace('\n', ' ') for p in raw_paragraphs if len(p.strip()) > 40]
+            print(f" le resultat de l'extraction : {len(result)} chunks")
+            return result
         else:
             raise Exception(f"aucune donnée extraite du document {document}")
 

@@ -20,7 +20,7 @@ def extract_article(url):
     texte = article.text[:500]
     return texte
 
-def get_news(requete: str):
+def f_get_news(requete: str):
     """
     permet de recupérer les informations , les nouvelles ou les actualités
     :param requete: les informations ou nouvelles ou actualités à rechercher
@@ -41,7 +41,7 @@ def get_news(requete: str):
         for article in data.get("results", []):
             titre =article.get("title")
             lien = article.get("link")
-            contenu = extract_article(lien)
+            contenu = article.get("description") #extract_article(lien)
             date_publication = article.get("pubDate")
             art = {"Titre":titre,"Lien":lien,"Contenu":contenu,"Date de publication":date_publication}
             responses.append(art)
