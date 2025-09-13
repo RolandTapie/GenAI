@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infographie : L'architecture d'un Agent RAG</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F4F1DE;
+            color: #2A363B;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        .flow-arrow {
+            font-size: 2rem;
+            color: #45B7D1;
+            align-self: center;
+            margin: 0 1rem;
+        }
+        .flow-card {
+            background-color: white;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            border-left: 5px solid #4ECDC4;
+            flex-grow: 1;
+            min-width: 150px;
+        }
+        .step-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+        }
+        .step-number {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: white;
+            background-color: #FF6B6B;
+            border-radius: 50%;
+            width: 2.5rem;
+            height: 2.5rem;
+            flex-shrink: 0;
+            margin-right: 1.5rem;
+        }
+        .header-gradient {
+            background: linear-gradient(90deg, #45B7D1, #4ECDC4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+<body class="antialiased">
+<div class="container mx-auto p-4 md:p-8 max-w-6xl">
+    <header class="text-center my-8">
+        <h1 class="text-4xl md:text-6xl font-black tracking-tight mb-2">Le Cerveau d'un <span class="header-gradient">Agent RAG</span></h1>
+        <p class="text-lg md:text-xl text-gray-700">Décortiquons en une minute l'architecture qui rend les IA plus intelligentes et factuelles.</p>
+    </header>
+
+    <main class="space-y-12">
+
+        <section id="systeme-complet">
+            <h2 class="text-3xl font-bold text-center mb-8">Le Système Complet : Une Vue d'Ensemble</h2>
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-8 items-start">
+
+                <div class="md:col-span-3 bg-white rounded-lg shadow-xl p-6 border-t-8 border-blue-400">
+                    <h3 class="text-2xl font-bold mb-4 flex items-center">
+                        <span class="text-4xl mr-3">🤖</span> L'Agent : Le Centre de Décision
+                    </h3>
+                    <p class="text-gray-600 mb-6">L'agent est le cerveau de l'opération. Il reçoit les requêtes, raisonne et décide des actions à entreprendre en utilisant un ensemble d'outils et sa mémoire.</p>
+
+                    <div class="space-y-4">
+                        <div class="p-4 bg-gray-50 rounded-lg">
+                            <h4 class="font-bold text-lg">🧠 Modèle LLM Principal</h4>
+                            <p class="text-gray-600">Le moteur de raisonnement qui analyse, planifie et génère les réponses finales.</p>
+                        </div>
+                        <div class="p-4 bg-gray-50 rounded-lg">
+                            <h4 class="font-bold text-lg">📝 Mémoire Conversationnelle</h4>
+                            <p class="text-gray-600">Un simple fichier texte ou une base de données pour se souvenir des interactions passées et maintenir le contexte.</p>
+                        </div>
+                        <div class="p-4 bg-gray-50 rounded-lg">
+                            <h4 class="font-bold text-lg">🔧 Boîte à Outils (Tools)</h4>
+                            <p class="text-gray-600">L'agent dispose d'une collection d'outils accessibles via des API pour accomplir des tâches spécifiques. Le RAG est l'un de ces outils.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="md:col-span-2 bg-white rounded-lg shadow-xl p-6 border-t-8 border-teal-400">
+                    <h3 class="text-2xl font-bold mb-4 flex items-center">
+                        <span class="text-4xl mr-3">📚</span> Le RAG : La Base de Connaissances
+                    </h3>
+                    <p class="text-gray-600 mb-6">Le système RAG (Retrieval-Augmented Generation) agit comme une bibliothèque externe spécialisée. L'agent l'interroge via une API pour obtenir des informations factuelles et précises issues de documents privés.</p>
+                    <div class="chart-container">
+                        <canvas id="toolsChart"></canvas>
+                    </div>
+                    <p class="text-center text-sm text-gray-500 mt-2">Le RAG est un outil puissant parmi d'autres dans l'arsenal de l'agent.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="fonctionnement-rag">
+            <h2 class="text-3xl font-bold text-center mb-8">Le Fonctionnement du RAG : Sous le Capot</h2>
+            <div class="bg-white rounded-lg shadow-xl p-6">
+                <div>
+                    <h3 class="text-xl font-bold mb-4 text-center bg-gray-100 p-2 rounded-md">Étape 1 : Préparation des Données (Offline)</h3>
+                    <p class="text-center text-gray-600 mb-6">Avant toute interaction, les documents de connaissance doivent être traités et indexés.</p>
+                    <div class="flex flex-col md:flex-row justify-center items-center md:items-stretch space-y-4 md:space-y-0 md:space-x-4">
+                        <div class="flow-card">
+                            <span class="text-3xl">📄</span>
+                            <h4 class="font-bold">Documents Source</h4>
+                            <p class="text-sm text-gray-500">PDF, TXT, HTML...</p>
+                        </div>
+                        <div class="flow-arrow hidden md:block">→</div>
+                        <div class="flow-card">
+                            <span class="text-3xl">🧩</span>
+                            <h4 class="font-bold">Extraction des Chunks</h4>
+                            <p class="text-sm text-gray-500">Découpage en morceaux.</p>
+                        </div>
+                        <div class="flow-arrow hidden md:block">→</div>
+                        <div class="flow-card">
+                            <span class="text-3xl">🔢</span>
+                            <h4 class="font-bold">Vectorisation</h4>
+                            <p class="text-sm text-gray-500">Conversion en vecteurs.</p>
+                        </div>
+                        <div class="flow-arrow hidden md:block">→</div>
+                        <div class="flow-card">
+                            <span class="text-3xl">🗂️</span>
+                            <h4 class="font-bold">Base Vectorielle</h4>
+                            <p class="text-sm text-gray-500">Indexation pour la recherche.</p>
+                        </div>
+                    </div>
+                </div>
+                <hr class="my-8 border-gray-200">
+                <div>
+                    <h3 class="text-xl font-bold mb-4 text-center bg-gray-100 p-2 rounded-md">Étape 2 : Réponse à une Requête (Online)</h3>
+                    <p class="text-center text-gray-600 mb-6">Lorsqu'un utilisateur pose une question, le RAG recherche les informations les plus pertinentes.</p>
+                    <div class="flex flex-col md:flex-row justify-center items-center md:items-stretch space-y-4 md:space-y-0 md:space-x-4">
+                        <div class="flow-card">
+                            <span class="text-3xl">❓</span>
+                            <h4 class="font-bold">Requête Utilisateur</h4>
+                            <p class="text-sm text-gray-500">"Quel est le rapport...?"</p>
+                        </div>
+                        <div class="flow-arrow hidden md:block">→</div>
+                        <div class="flow-card">
+                            <span class="text-3xl">🔍</span>
+                            <h4 class="font-bold">Recherche (Retrieval)</h4>
+                            <p class="text-sm text-gray-500">Recherche de similarité sémantique.</p>
+                        </div>
+                        <div class="flow-arrow hidden md:block">→</div>
+                        <div class="flow-card">
+                            <span class="text-3xl">🎯</span>
+                            <h4 class="font-bold">Résultats Pertinents</h4>
+                            <p class="text-sm text-gray-500">Les chunks les plus utiles sont extraits.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="flux-complet">
+            <h2 class="text-3xl font-bold text-center mb-8">Le Flux d'Information Complet</h2>
+            <div class="bg-white rounded-lg shadow-xl p-6 md:p-8">
+                <div class="max-w-3xl mx-auto">
+                    <div class="step-item">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h4 class="font-bold">Requête Utilisateur</h4>
+                            <p class="text-gray-600">L'utilisateur pose une question : "Quel est le dernier rapport de l'entreprise ?"</p>
+                        </div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h4 class="font-bold">Décision de l'Agent</h4>
+                            <p class="text-gray-600">Le LLM de l'agent analyse la requête et décide d'utiliser son outil de recherche RAG.</p>
+                        </div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h4 class="font-bold">Appel API</h4>
+                            <p class="text-gray-600">L'agent active l'outil en effectuant un appel API vers le système RAG avec la question.</p>
+                        </div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <h4 class="font-bold">Recherche RAG</h4>
+                            <p class="text-gray-600">Le système RAG vectorise la question et recherche les extraits les plus pertinents dans sa base de données vectorielle.</p>
+                        </div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">5</div>
+                        <div class="step-content">
+                            <h4 class="font-bold">Retour des Informations</h4>
+                            <p class="text-gray-600">Les extraits pertinents sont renvoyés à l'agent sous forme de contexte.</p>
+                        </div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">6</div>
+                        <div class="step-content">
+                            <h4 class="font-bold">Génération de la Réponse</h4>
+                            <p class="text-gray-600">L'agent (LLM) utilise le contexte fourni par le RAG pour formuler une réponse finale, précise et factuelle.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="conclusion" class="text-center bg-white rounded-lg shadow-xl p-8 border-t-8 border-yellow-400">
+            <h2 class="text-3xl font-bold mb-4">Conclusion : La Synergie Parfaite</h2>
+            <p class="text-lg text-gray-700 max-w-3xl mx-auto">
+                La magie de cette architecture réside dans la séparation des tâches : un **agent de raisonnement** qui prend des décisions et une **base de connaissances externe** qui fournit les faits. C'est la clé pour construire des systèmes d'IA robustes, fiables et extensibles.
+            </p>
+        </section>
+    </main>
+
+    <footer class="text-center mt-12 py-6 border-t border-gray-300">
+        <p class="text-gray-600">Infographie créée pour illustrer l'architecture d'un agent RAG.</p>
+    </footer>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const ctx = document.getElementById('toolsChart').getContext('2d');
+        const toolsChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Recherche RAG', 'Calculatrice', 'API Météo', 'Autres Outils'],
+                datasets: [{
+                    label: 'Distribution des Outils',
+                    data: [45, 20, 15, 20],
+                    backgroundColor: [
+                        '#FF6B6B',
+                        '#4ECDC4',
+                        '#45B7D1',
+                        '#FED766'
+                    ],
+                    borderColor: '#F4F1DE',
+                    borderWidth: 4,
+                    hoverOffset: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '60%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 20,
+                            font: {
+                                family: "'Inter', sans-serif"
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            title: function(tooltipItems) {
+                                const item = tooltipItems[0];
+                                let label = item.chart.data.labels[item.dataIndex];
+                                if (Array.isArray(label)) {
+                                    return label.join(' ');
+                                } else {
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
+</body>
+</html>

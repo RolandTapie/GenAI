@@ -4,6 +4,8 @@ from abc import ABC
 from sentence_transformers import SentenceTransformer
 from src.services.vectorization.vectorization import Vectorization
 import chromadb
+from src.services.logs.loggers import log
+
 load_dotenv()
 model=os.getenv("model_path")
 
@@ -42,19 +44,18 @@ class ChromaEmbedding(InterfaceEmbedding):
         return self.client
 
     def add_to_collection(self, texts):
-        print("les chunks")
         metadata = [{'source':f'metadata{i}','auteur': 'auteur', 'type': 'types'} for i, text in enumerate(texts)]
         collection_name=self.vector_model
         try:
             # Essaye de récupérer la collection
             collection = self.client.get_collection(name=collection_name)
-            print(f"La collection '{collection_name}' existe ✅")
+            log(f"La collection '{collection_name}' existe ✅")
 
             # Si elle existe, on peut la supprimer
             self.client.delete_collection(name=collection_name)
-            print(f"Collection '{collection_name}' supprimée ❌")
+            log(f"Collection '{collection_name}' supprimée ❌")
 
-            print("Création d'une nouvelle collection")
+            log("Création d'une nouvelle collection")
             collection = self.client.get_or_create_collection(name=collection_name,metadata={"hnsw:space": "cosine"})
             self.collection =  collection
             emb = self.embed_texts(texts)

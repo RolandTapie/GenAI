@@ -1,9 +1,9 @@
 import requests
+from src.services.logs.loggers import log
 
 def rag_api(host,port,root,question):
-    print(f"http://{host}:{port}/{root}?request={question}")
+    log(f"http://{host}:{port}/{root}?request={question}")
     response = requests.post(f"http://{host}:{port}/{root}?request={question}")
-    print(response.text)
     return response.text
 
 def f_get_rag_response(query: str) -> str :

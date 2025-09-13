@@ -1,4 +1,6 @@
 from docling.document_converter import DocumentConverter
+from src.services.logs.loggers import log
+
 from docling.chunking import HybridChunker
 import re
 
@@ -26,15 +28,17 @@ class DoclingExtractor():
         converter = DocumentConverter()
         result = converter.convert(document)
         doc=result.document.export_to_text()
-        print("le document")
         #print(doc)
         self.doc=doc
         self.meta="meta test"
         return doc
 
+    def chunk_by_chars(self, text, chunk_size=500):
+        return [text[i:i+chunk_size] for i in range(0, len(text), chunk_size)]
+
     def extract_paragraphs(self, document, sep):
         """Création des chunks à vectoriser"""
-        #text = extract_text(document)
+
         text = self.docling_extraction(document)
 
         if text != "":
@@ -42,9 +46,12 @@ class DoclingExtractor():
             #text = re.sub(r'-\n', '', text)
             #text = re.sub(r'\n', '', text)
             #raw_paragraphs = text.split('.')
+            if isinstance(sep, (int, float)):
+                return self.chunk_by_chars(text,sep)
+
             raw_paragraphs = text.split(sep)
             result = [p.strip().replace('\n', ' ') for p in raw_paragraphs if len(p.strip()) > 40]
-            print(f" le resultat de l'extraction : {len(result)} chunks")
+            log(f" le resultat de l'extraction : {len(result)} chunks")
             return result
         else:
             raise Exception(f"aucune donnée extraite du document {document}")

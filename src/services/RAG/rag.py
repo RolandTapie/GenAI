@@ -13,12 +13,12 @@ from langchain_chroma import Chroma
 from src.services.vector_database.vector_db import ChromaEmbedding
 from src.services.extract_documents.document_extraction import DoclingExtractor
 from src.services.vectorization.vectorization import Vectorization
+from src.services.logs.loggers import log
 
 
 def rag_api(host,port,root,question):
-    print(f"http://{host}:{port}/{root}?request={question}")
+    log(f"http://{host}:{port}/{root}?request={question}")
     response = requests.post(f"http://{host}:{port}/{root}?request={question}")
-    print(response.text)
     return response.text
 
 class RagModel:
@@ -51,7 +51,6 @@ class RagModel:
 from src.services.RAG.extraction.document_extraction import DoclingExtractor
 from src.services.RAG.vectorization.vectorization import Vectorization
 from src.services.RAG.embeddings.db_embeddings import ChromaEmbedding
-from src.services.logs.loggers import log
 
 class RagModelV2:
     def __init__(self, extractor: DoclingExtractor, vector: Vectorization, embedding: ChromaEmbedding):
@@ -74,7 +73,6 @@ class RagModelV2:
 
     def rag_query(self,query):
         log(f"consulation du RAG : {query}")
-        print(f"la question est : {query}")
         query_vector = self.vector.transform(query)
         result = self.embedding.query(query_vector)
         log(f"reponse du RAG : {result}")

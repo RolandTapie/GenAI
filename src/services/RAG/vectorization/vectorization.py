@@ -2,6 +2,8 @@ from dotenv import load_dotenv
 import os
 from abc import ABC
 from sentence_transformers import SentenceTransformer
+from src.services.logs.loggers import log
+
 import chromadb
 load_dotenv()
 local_model=os.getenv("model_path")
@@ -18,6 +20,7 @@ class Vectorization():
     def __init__(self, vector_model):
         self.vector_model=vector_model
         if self.vector_model == "all-MiniLM-L6-v2":
+            log(f"Génération du model de vectorization {self.vector_model}")
             self.embedding_model=SentenceTransformer(local_model)
 
         elif self.vector_model == "openai":

@@ -3,6 +3,8 @@ import os
 from abc import ABC
 from sentence_transformers import SentenceTransformer
 from src.services.vectorization.vectorization import Vectorization
+from src.services.logs.loggers import log
+
 import chromadb
 load_dotenv()
 model=os.getenv("model_path")
@@ -40,26 +42,26 @@ class ChromaEmbedding(InterfaceEmbedding):
         return self.client
 
     def add_to_collection(self, texts, vectors):
-        #print("les chunks")
+        #log("les chunks")
         metadata = [{'source':f'metadata{i}','auteur': 'auteur', 'type': 'types'} for i, text in enumerate(texts)]
         collection_name=self.collection
         try:
             # Essaye de récupérer la collection
             collection = self.client.get_collection(name=collection_name)
-            print(f"La collection '{collection_name}' existe ✅")
+            log(f"La collection '{collection_name}' existe ✅")
 
             # Si elle existe, on peut la supprimer
             self.client.delete_collection(name=collection_name)
-            print(f"Collection '{collection_name}' supprimée ❌")
+            log(f"Collection '{collection_name}' supprimée ❌")
 
-            print("Création d'une nouvelle collection")
+            log("Création d'une nouvelle collection")
             collection = self.client.get_or_create_collection(name=collection_name,metadata={"hnsw:space": "cosine"})
             self.collection =  collection
             self.collection.add(documents=texts,embeddings=vectors,metadatas= metadata,ids=[str(i) for i in range(len(texts))])
         except Exception as e:
 
-            print(f"La collection '{collection_name}' n'existe pas.")
-            print("Création d'une nouvelle collection")
+            log(f"La collection '{collection_name}' n'existe pas.")
+            log("Création d'une nouvelle collection")
             collection = self.client.get_or_create_collection(name=collection_name,metadata={"hnsw:space": "cosine"})
             self.collection =  collection
 
@@ -74,17 +76,16 @@ class ChromaEmbedding(InterfaceEmbedding):
 
         final_res = results['documents'][0]
         meta_res = results['metadatas'][0]
-        print("la cible")
         k=0
         for doc,dis,id in zip(results['documents'][0],results['distances'][0],results['ids'][0]):
-            print(k,":",id,":",dis,":",doc)
+
             k=k+1
-        # print("la distance")
+        # log("la distance")
         # for dis in results['distances'][0]:
-        #     print(dis)
-        # print("l'indice'")
+        #     log(dis)
+        # log("l'indice'")
         # for id in results['ids'][0]:
-        #     print(id)
+        #     log(id)
 
         if self.context_extend == True:
 
@@ -103,7 +104,7 @@ class ChromaEmbedding(InterfaceEmbedding):
             final_set= set()
             final_res = []
             for document in mix:
-                print(document)
+                log(document)
                 if document not in final_set:
                     final_res.append(document)
                     final_set.add(document)
@@ -158,7 +159,7 @@ class FaissEmbedding(InterfaceEmbedding):
             final_set= set()
             final_res = []
             for document in mix:
-                print(document)
+                log(document)
                 if document not in final_set:
                     final_res.append(document)
                     final_set.add(document)
