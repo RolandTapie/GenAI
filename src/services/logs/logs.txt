@@ -1,0 +1,19 @@
+2025-09-13 13:01:16.356613 > INFO > Chargement du document C:\Users\tallar\Documents\PROJETS\GenAI\docs\files\Aresbal.pdf via le modele all-MiniLM-L6-v2 pour la DB d'embedding rag
+2025-09-13 13:01:16.359613 > INFO > Instanciation de l'extractor
+2025-09-13 13:01:16.360613 > INFO > Instanciation du vectorizer
+2025-09-13 13:01:16.361818 > INFO > Génération du model de vectorization all-MiniLM-L6-v2
+2025-09-13 13:01:18.054784 > INFO > Instanciation de l'embedding
+2025-09-13 13:01:18.191226 > INFO > Injection des dépendances dans le model de RAG
+2025-09-13 13:01:18.191226 > INFO > Injection de l'extracteur
+2025-09-13 13:01:18.192225 > INFO > Injection du vectorizer
+2025-09-13 13:01:18.192225 > INFO > Injection de l'embedding
+2025-09-13 13:01:18.193225 > INFO > Extraction des chunks : C:\Users\tallar\Documents\PROJETS\GenAI\docs\files\Aresbal.pdf
+2025-09-13 13:02:03.985279 > INFO >  25 chunks extraits
+2025-09-13 13:02:03.987277 > INFO > Vectorisation des chunks
+2025-09-13 13:02:05.268621 > INFO >  25 chunks vectorisés
+2025-09-13 13:02:05.271682 > INFO > Embedding des vecteurs
+2025-09-13 13:02:05.272683 > INFO > La collection 'rag_collection' existe ✅
+2025-09-13 13:02:05.316223 > INFO > Collection 'rag_collection' supprimée ❌
+2025-09-13 13:02:05.317221 > INFO > Création d'une nouvelle collection
+2025-09-13 13:02:05.434199 > INFO > RAG constitué
+2025-09-13 13:02:05.434199 > INFO > Document chargé et embeddings créés
