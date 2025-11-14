@@ -17,3 +17,6 @@
 2025-09-13 13:02:05.317221 > INFO > Création d'une nouvelle collection
 2025-09-13 13:02:05.434199 > INFO > RAG constitué
 2025-09-13 13:02:05.434199 > INFO > Document chargé et embeddings créés
+2025-09-14 21:18:45.602155 > INFO > Analyse Exploratoire du Dataset
+2025-09-14 21:18:45.605156 > INFO > la matrice de correlation
+2025-09-14 21:18:46.582936 > INFO > les boxplots

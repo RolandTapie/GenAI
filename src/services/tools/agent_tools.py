@@ -12,6 +12,7 @@ from src.services.tools.News.news import *
 
 class AgentTools:
     def __init__(self):
+        print("Initialisation de gestionnaire de tools V_1")
         self.tools=[]
 
     def get_tools(self):

@@ -1,0 +1,20 @@
+graph TD
+    A[Requête Utilisateur] --> B{Agent IA / Orchestrateur LLM};
+    B -- "Décide d'utiliser un outil" --> C[Boîte à Outils Toolbox];
+
+C -- "Appel à l'outil 'Recherche RAG'" --> D[Outil RAG / DB Vectorielle];
+D -- "Récupère des documents pertinents" --> E[Base de Connaissances Documents, FAQs, Articles];
+E --> D;
+D -- "Retourne le contexte extrait" --> B;
+
+B -- "Génère la réponse finale\n(basée sur le contexte RAG)" --> F[Réponse à l'Utilisateur];
+
+C -- "Autres Outils (ex: Code Interpreter, API Call, Calculatrice...)" --> B;
+
+subgraph "Processus RAG Détaillé"
+D_sub_A[Requête/Query] --> D_sub_B(Embedding du Query);
+D_sub_B --> D_sub_C(Recherche Similaire<br>dans DB Vectorielle);
+D_sub_C --> D_sub_D(Récupération des Chunks\nde Documents);
+D_sub_D --> D_sub_E(Retourne Contexte pour Agent);
+E -- "Indexer / Embedder" --> D_sub_C;
+end

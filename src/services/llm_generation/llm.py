@@ -457,6 +457,7 @@ class Model:
                 )
                 print("----le prompt après appels des fonctions----")
                 print (calls)
+
             return result.choices[0].message.content
 
     def gemini_process(self,model, agent, message):

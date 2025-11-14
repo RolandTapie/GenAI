@@ -1,0 +1,20 @@
+graph TB
+    User[User Query] --> Agent[AI Agent]
+
+    Agent --> Decision{Choose Knowledge Source}
+
+    Decision -->|Policy/Internal Questions| Handbook[Handbook Search<br/>Internal Knowledge Base]
+    Decision -->|Specific URL Provided| WebPage[Single Page Retrieval<br/>Extract & Parse Content]
+    Decision -->|Current/External Info| WebSearch[Web Search<br/>Domain-Filtered Search]
+
+    Handbook --> HandbookContent[Handbook Content]
+    WebPage --> PageContent[Parsed Web Page Content]
+    WebSearch --> SearchResults[Search Results with Citations]
+
+    HandbookContent --> Synthesis[Synthesize Information]
+    PageContent --> Synthesis
+    SearchResults --> Synthesis
+
+    Synthesis --> Answer[Structured Answer<br/>with Citations]
+
+    Answer --> User
