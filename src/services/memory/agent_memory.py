@@ -22,7 +22,7 @@ class AgentMemory():
         fichier = self.fichier
         try:
             with open(fichier, "x", encoding="utf-8") as f:  # "x" = création exclusive
-                f.write("# Mémoire de l'agent IA\n")
+                f.write(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] >>> Création de la mémoire de l'agent")
             print(f"Fichier '{fichier}' créé avec succès.")
         except FileExistsError:
             print(f"Le fichier '{fichier}' existe déjà.")
@@ -39,7 +39,7 @@ class AgentMemory():
         """Sauvegarde la mémoire actuelle dans le fichier"""
         with open(self.fichier, "w", encoding="utf-8") as f:
             for entree in self.memoire:
-                f.write("\n" + entree + "\n")
+                f.write("\n" + entree)
 
     def update_memory(self, info: str):
         info = info.replace("\n"," ")
