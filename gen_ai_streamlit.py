@@ -5,7 +5,7 @@ import requests
 
 from src.services.Agent.agent import Agent
 from src.services.llm_generation.llm import Model
-from src.services.tools.agent_tools import AgentTools
+from src.services.tools.agent_tools_v2 import AgentTools
 from src.services.memory.agent_memory import AgentMemory
 
 
@@ -18,25 +18,26 @@ LLM_modele = "gemini-2.5-flash"
 modele="openai"
 LLM_modele ="gpt-4o"
 
-print(f"Initialisation du modème {modele} version {LLM_modele}")
-model=Model(modele,LLM_modele)
-print(f"Injection des tools et d'une mémoire")
-agent=Agent(model=model,tools=AgentTools(),memory=AgentMemory("poc","test_memoire.txt"))
 
 from dotenv import load_dotenv
 import os
 load_dotenv()
 document= os.getenv("business_file")
 
-
-
+etat = "init"
 
 
 # --- Initialisation unique des modèles ---
-if "gen_model" not in st.session_state:
+if  etat=="init" : #"gen_model" not in st.session_state:
+    etat = "run"
+    print(f"Initialisation du modème {modele} version {LLM_modele}")
+    model=Model(modele,LLM_modele)
+    print(f"Injection des tools et d'une mémoire")
+    agent=Agent(model=model,tools=AgentTools(),memory=AgentMemory("poc","test_memoire.txt"))
+
     with st.spinner("Initialisation du modèle génératif..."):
         st.session_state.ia_agent = agent
-    st.success("Modèle génératif ✅")
+        st.success("Modèle génératif ✅")
 
 ia_agent = st.session_state.ia_agent
 
