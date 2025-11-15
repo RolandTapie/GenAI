@@ -1,8 +1,9 @@
+import os
 from datetime import datetime
 from dotenv import load_dotenv
-import os
-load_dotenv()
+from collections import deque
 
+load_dotenv()
 memory_file = os.getenv("MEMORY_PATH")
 
 class AgentMemory():
@@ -31,7 +32,7 @@ class AgentMemory():
         """Charge la mémoire existante depuis le fichier"""
         if os.path.exists(self.fichier):
             with open(self.fichier, "r", encoding="utf-8") as f:
-                self.memoire = [ligne.strip() for ligne in f.readlines()]
+                self.memoire = [ligne.strip() for ligne in deque(f, maxlen=10)]
         else:
             self.memoire = []
 
