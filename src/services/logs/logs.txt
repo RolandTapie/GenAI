@@ -20,3 +20,4 @@
 2025-09-14 21:18:45.602155 > INFO > Analyse Exploratoire du Dataset
 2025-09-14 21:18:45.605156 > INFO > la matrice de correlation
 2025-09-14 21:18:46.582936 > INFO > les boxplots
+2025-11-15 13:42:52.578318 > INFO > http://localhost:8000//query?request=les informations sur la chine
