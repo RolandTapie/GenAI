@@ -3,7 +3,7 @@ chromadb
 colorama
 docling
 dotenv
-faiss
+faiss-cpu==1.11.0.post1
 fastapi
 langchain_chroma
 langchain_openai
