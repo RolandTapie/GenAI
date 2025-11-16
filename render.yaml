@@ -1,6 +1,0 @@
-services:
-  - type: web
-    name: streamlit_agent_ui
-    env: python
-    buildCommand: "pip install -r requirements.txt"
-    startCommand: "streamlit run gen_ai_streamlit.py"
