@@ -7,7 +7,7 @@ faiss-cpu==1.11.0.post1
 fastapi
 langchain_chroma
 langchain_openai
-newspaper
+newspaper3k==0.2.8
 numpy
 openai
 pandas
