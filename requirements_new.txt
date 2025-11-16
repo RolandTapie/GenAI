@@ -1,12 +1,12 @@
-anthropic
+#anthropic
 chromadb
 colorama
 docling
 dotenv
 faiss-cpu==1.11.0.post1
 fastapi
-langchain_chroma
-langchain_openai
+#langchain_chroma
+#langchain_openai
 newspaper3k==0.2.8
 numpy==2.2.6
 openai==1.93.0
@@ -16,7 +16,7 @@ pydantic
 pyttsx3
 requests
 sentence_transformers
-scikit-learn==1.7.0
+#scikit-learn==1.7.0
 SQLAlchemy==2.0.41
 streamlit==1.47.1
 uvicorn==0.35.0
