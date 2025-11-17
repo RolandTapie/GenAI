@@ -1,5 +1,5 @@
 import requests
-#from newspaper import Article
+from newspaper import Article
 
 from dotenv import load_dotenv
 import os
@@ -10,15 +10,15 @@ API_KEY = os.getenv("NEWSDATA_IO")
 
 
 def extract_article(url):
-    #url = "https://www.example.com/article.html"
-    # article = Article(url, language="fr")
-    # article.download()
-    # article.parse()
-    # titre = article.title
-    # auteurs = article.authors
-    # date_publication = article.publish_date
-    # texte = article.text[:500]
-    texte=""
+    url = "https://www.example.com/article.html"
+    article = Article(url, language="fr")
+    article.download()
+    article.parse()
+    titre = article.title
+    auteurs = article.authors
+    date_publication = article.publish_date
+    texte = article.text[:500]
+
     return texte
 
 def f_get_news(requete: str):

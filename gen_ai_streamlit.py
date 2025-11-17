@@ -26,6 +26,10 @@ document= os.getenv("business_file")
 
 etat = "init"
 
+print(f"Initialisation du modème {modele} version {LLM_modele}")
+model=Model(modele,LLM_modele)
+print(f"Injection des tools et d'une mémoire")
+agent=Agent(model=model,tools=AgentTools(),memory=AgentMemory("poc","test_memoire.txt"))
 
 # --- Initialisation unique des modèles ---
 if  etat=="init" : #"gen_model" not in st.session_state:
@@ -35,9 +39,9 @@ if  etat=="init" : #"gen_model" not in st.session_state:
     print(f"Injection des tools et d'une mémoire")
     agent=Agent(model=model,tools=AgentTools(),memory=AgentMemory("poc","test_memoire.txt"))
 
-    with st.spinner("Initialisation du modèle génératif..."):
-        st.session_state.ia_agent = agent
-        st.success("Modèle génératif ✅")
+with st.spinner("Initialisation du modèle génératif..."):
+    st.session_state.ia_agent = agent
+    st.success("Modèle génératif ✅")
 
 ia_agent = st.session_state.ia_agent
 
