@@ -6,7 +6,7 @@ faiss-cpu==1.11.0.post1
 fastapi
 google-ai-generativelanguage==0.6.15
 google-generativeai==0.8.5
-newspaper3k==0.2.8
+#newspaper3k==0.2.8
 numpy==2.2.6
 openai==1.93.0
 pandas==2.3.0
