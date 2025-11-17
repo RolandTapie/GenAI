@@ -5,7 +5,7 @@ import requests
 
 from src.services.Agent.agent import Agent
 from src.services.llm_generation.llm import Model
-from src.services.tools.agent_tools_v2 import AgentTools
+from src.services.tools.agent_tools import AgentTools
 from src.services.memory.agent_memory import AgentMemory
 
 
