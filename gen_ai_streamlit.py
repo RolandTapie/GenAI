@@ -150,6 +150,7 @@ if "messages" not in st.session_state:
     ]
 
 
+
 def render_chat_html(messages):
     """Construit un unique bloc HTML pour la zone de chat."""
     html_parts = []
