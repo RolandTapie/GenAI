@@ -335,6 +335,9 @@ class Model:
         self.memory=None
         self.context=None
 
+    def get_tools(self):
+        return self.tools_openai
+
     def initialize(self,agent_tools,memory:AgentMemory):
         if agent_tools:
 

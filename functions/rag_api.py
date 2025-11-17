@@ -20,6 +20,7 @@ from dotenv import load_dotenv
 import os
 load_dotenv()
 document= os.getenv("business_file")
+document =  r"C:\Users\tallar\Documents\PROJETS\GenAI\docs\files\TeletravailV1.pdf"
 
 print(f"chargement du fichier: \n {document}")
 

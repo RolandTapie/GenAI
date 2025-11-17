@@ -1,0 +1,356 @@
+Détail des Imports et leurs Fichiers Sources :
+============================================================
+MODULE: abc
+  - LLM_Model\Interfaces\generative.py
+  - functions\vector_db.py
+  - functions\vectorization.py
+  - src\services\RAG\embeddings\db_embeddings.py
+  - src\services\RAG\vectorization\vectorization.py
+  - src\services\vector_database\vector_db.py
+  - src\services\vectorization\vectorization.py
+----------------------------------------
+MODULE: anthropic
+  - functions\llm.py
+  - src\services\llm_generation\llm.py
+----------------------------------------
+MODULE: ast
+  - dependecies.py
+  - functions\tools.py
+  - functions\tools_calls.py
+  - src\services\llm_generation\tools\tools_calls.py
+  - src\services\tools\agent_tools.py
+  - src\services\tools\agent_tools_v2.py
+----------------------------------------
+MODULE: asyncio
+  - Agents\mcp\src\client.py
+  - functions\agent.py
+----------------------------------------
+MODULE: chromadb
+  - functions\vector_db.py
+  - functions\vectorization.py
+  - src\services\RAG\embeddings\db_embeddings.py
+  - src\services\RAG\vectorization\vectorization.py
+  - src\services\vector_database\vector_db.py
+  - src\services\vectorization\vectorization.py
+----------------------------------------
+MODULE: collections
+  - dependecies.py
+  - src\services\memory\agent_memory.py
+----------------------------------------
+MODULE: colorama
+  - Agents\workflow\src\ai_agent.py
+  - ChatBot_RAG\src\RAG_llm_mistral_openai.py
+----------------------------------------
+MODULE: contextlib
+  - functions\agent.py
+----------------------------------------
+MODULE: crewai
+  - ChatBot_RAG\src\RAG_llm_mistral_Groq.py
+----------------------------------------
+MODULE: datetime
+  - 1_RAG\UI\gen_ai_streamlit.py
+  - ChatBot_RAG_Streamlit\src\gen_ai_streamlit.py
+  - functions\gen_ai_streamlit.py
+  - gen_ai_streamlit.py
+  - src\gen_ai_streamlit.py
+  - src\services\logs\loggers.py
+  - src\services\memory\agent_memory.py
+----------------------------------------
+MODULE: docling
+  - functions\document_extraction.py
+  - src\services\RAG\extraction\document_extraction.py
+  - src\services\extract_documents\document_extraction.py
+----------------------------------------
+MODULE: document_extraction
+  - functions\rag.py
+----------------------------------------
+MODULE: dotenv
+  - 1_RAG\UI\gen_ai_streamlit.py
+  - 1_RAG\api\rag_api.py
+  - Agents\mcp\src\client.py
+  - Agents\mcp\src\serveur.py
+  - Agents\workflow\src\ai_agent.py
+  - ChatBot\src\chatBot_sklearn.py
+  - ChatBot_RAG\src\RAG_llm_mistral_Fusion.py
+  - ChatBot_RAG\src\RAG_llm_mistral_Groq.py
+  - ChatBot_RAG\src\RAG_llm_mistral_openai.py
+  - ChatBot_ligt_RAG\src\RAG_llm_mistral.py
+  - functions\agent.py
+  - functions\gen_ai_streamlit.py
+  - functions\llm.py
+  - functions\rag_api.py
+  - functions\vector_db.py
+  - functions\vectorization.py
+  - gen_ai_streamlit.py
+  - src\api\rag_api.py
+  - src\gen_ai_streamlit.py
+  - src\services\RAG\embeddings\db_embeddings.py
+  - src\services\RAG\vectorization\vectorization.py
+  - src\services\llm_generation\llm.py
+  - src\services\llm_generation\tools\DB\retrieve_db.py
+  - src\services\memory\agent_memory.py
+  - src\services\tools\DB\retrieve_db.py
+  - src\services\tools\News\news.py
+  - src\services\vector_database\vector_db.py
+  - src\services\vectorization\vectorization.py
+----------------------------------------
+MODULE: faiss
+  - functions\llm.py
+  - src\services\llm_generation\llm.py
+----------------------------------------
+MODULE: fastapi
+  - 1_RAG\api\rag_api.py
+  - functions\rag_api.py
+  - src\api\rag_api.py
+----------------------------------------
+MODULE: ftools
+  - functions\tools_calls.py
+----------------------------------------
+MODULE: functions
+  - Agents\mcp\src\client.py
+  - Agents\workflow\src\ai_agent.py
+  - ChatBot_RAG\src\RAG_llm_mistral_Fusion.py
+  - ChatBot_RAG_Streamlit\src\gen_ai_streamlit.py
+  - functions\agent.py
+----------------------------------------
+MODULE: google
+  - src\services\llm_generation\llm.py
+----------------------------------------
+MODULE: html
+  - 1_RAG\UI\gen_ai_streamlit.py
+  - ChatBot_RAG_Streamlit\src\gen_ai_streamlit.py
+  - functions\gen_ai_streamlit.py
+  - gen_ai_streamlit.py
+  - src\gen_ai_streamlit.py
+----------------------------------------
+MODULE: importlib
+  - src\services\tools\agent_tools_v2.py
+----------------------------------------
+MODULE: json
+  - Agents\workflow\src\ai_agent.py
+  - functions\agent.py
+  - functions\llm.py
+  - functions\prompt.py
+  - functions\tools.py
+  - functions\tools_calls.py
+  - functions\vectorization.py
+  - src\services\RAG\vectorization\vectorization.py
+  - src\services\llm_generation\llm.py
+  - src\services\llm_generation\tools\tools_calls.py
+  - src\services\tools\agent_tools.py
+  - src\services\tools\agent_tools_v2.py
+  - src\services\vectorization\vectorization.py
+----------------------------------------
+MODULE: langchain_chroma
+  - functions\rag.py
+  - src\services\RAG\rag.py
+----------------------------------------
+MODULE: langchain_openai
+  - functions\rag.py
+  - src\services\RAG\rag.py
+----------------------------------------
+MODULE: llm
+  - functions\gen_ai_streamlit.py
+  - functions\rag.py
+----------------------------------------
+MODULE: mcp
+  - Agents\mcp\src\serveur.py
+  - functions\agent.py
+----------------------------------------
+MODULE: newspaper
+  - src\services\tools\News\news.py
+----------------------------------------
+MODULE: numpy
+  - ChatBot\src\chatBot_sklearn.py
+  - ChatBot_RAG\src\RAG_llm_mistral_openai.py
+  - ChatBot_ligt_RAG\src\RAG_llm_mistral.py
+  - functions\llm.py
+  - functions\rag.py
+  - functions\vectorization.py
+  - src\services\RAG\rag.py
+  - src\services\RAG\vectorization\vectorization.py
+  - src\services\llm_generation\llm.py
+  - src\services\vectorization\vectorization.py
+----------------------------------------
+MODULE: openai
+  - Agents\workflow\src\ai_agent.py
+  - ChatBot_RAG\src\RAG_llm_mistral_openai.py
+  - functions\llm.py
+  - functions\rag.py
+  - functions\vectorization.py
+  - src\services\RAG\rag.py
+  - src\services\RAG\vectorization\vectorization.py
+  - src\services\llm_generation\llm.py
+  - src\services\vectorization\vectorization.py
+----------------------------------------
+MODULE: os
+  - 1_RAG\UI\gen_ai_streamlit.py
+  - 1_RAG\api\rag_api.py
+  - Agents\mcp\src\client.py
+  - Agents\mcp\src\serveur.py
+  - Agents\workflow\src\ai_agent.py
+  - ChatBot\src\chatBot_sklearn.py
+  - ChatBot_RAG\src\RAG_llm_mistral_Fusion.py
+  - ChatBot_RAG\src\RAG_llm_mistral_Groq.py
+  - ChatBot_RAG\src\RAG_llm_mistral_openai.py
+  - ChatBot_ligt_RAG\src\RAG_llm_mistral.py
+  - dependecies.py
+  - functions\agent.py
+  - functions\gen_ai_streamlit.py
+  - functions\llm.py
+  - functions\rag.py
+  - functions\rag_api.py
+  - functions\tools.py
+  - functions\tools_calls.py
+  - functions\vector_db.py
+  - functions\vectorization.py
+  - gen_ai_streamlit.py
+  - src\api\rag_api.py
+  - src\gen_ai_streamlit.py
+  - src\services\RAG\embeddings\db_embeddings.py
+  - src\services\RAG\rag.py
+  - src\services\RAG\vectorization\vectorization.py
+  - src\services\llm_generation\llm.py
+  - src\services\llm_generation\tools\DB\retrieve_db.py
+  - src\services\llm_generation\tools\tools_calls.py
+  - src\services\memory\agent_memory.py
+  - src\services\tools\DB\retrieve_db.py
+  - src\services\tools\News\news.py
+  - src\services\tools\agent_tools.py
+  - src\services\tools\agent_tools_v2.py
+  - src\services\vector_database\vector_db.py
+  - src\services\vectorization\vectorization.py
+----------------------------------------
+MODULE: pandas
+  - src\services\llm_generation\tools\DB\retrieve_db.py
+  - src\services\tools\DB\retrieve_db.py
+  - src\services\tools\Finance\finance.py
+----------------------------------------
+MODULE: pdfminer
+  - ChatBot\src\chatBot_sklearn.py
+  - ChatBot_RAG\src\RAG_llm_mistral_openai.py
+  - ChatBot_ligt_RAG\src\RAG_llm_mistral.py
+  - functions\document_extraction.py
+----------------------------------------
+MODULE: pprint
+  - src\services\llm_generation\llm.py
+----------------------------------------
+MODULE: pydantic
+  - 1_RAG\api\rag_api.py
+  - functions\data_model.py
+  - functions\rag_api.py
+  - src\api\rag_api.py
+----------------------------------------
+MODULE: pyttsx3
+  - functions\rag_functions.py
+----------------------------------------
+MODULE: rag
+  - functions\gen_ai_streamlit.py
+  - functions\rag_api.py
+----------------------------------------
+MODULE: re
+  - functions\document_extraction.py
+  - src\services\RAG\extraction\document_extraction.py
+  - src\services\extract_documents\document_extraction.py
+----------------------------------------
+MODULE: requests
+  - 1_RAG\UI\gen_ai_streamlit.py
+  - Agents\mcp\src\serveur.py
+  - functions\ftools\tools_functions.py
+  - functions\gen_ai_streamlit.py
+  - functions\llm.py
+  - functions\rag.py
+  - functions\test_api.py
+  - gen_ai_streamlit.py
+  - src\gen_ai_streamlit.py
+  - src\services\RAG\rag.py
+  - src\services\llm_generation\llm.py
+  - src\services\llm_generation\tools\weather\weather.py
+  - src\services\tools\News\news.py
+  - src\services\tools\Rag_tool\rag_backend.py
+  - src\services\tools\weather\weather.py
+  - tools\weather.py
+----------------------------------------
+MODULE: sentence_transformers
+  - ChatBot_RAG\src\RAG_llm_mistral_Fusion.py
+  - ChatBot_RAG\src\RAG_llm_mistral_openai.py
+  - ChatBot_ligt_RAG\src\RAG_llm_mistral.py
+  - functions\vector_db.py
+  - functions\vectorization.py
+  - src\services\RAG\embeddings\db_embeddings.py
+  - src\services\RAG\vectorization\vectorization.py
+  - src\services\vector_database\vector_db.py
+  - src\services\vectorization\vectorization.py
+----------------------------------------
+MODULE: shutil
+  - functions\rag_api.py
+  - src\api\rag_api.py
+----------------------------------------
+MODULE: sklearn
+  - ChatBot\src\chatBot_sklearn.py
+  - ChatBot_RAG\src\RAG_llm_mistral_openai.py
+  - ChatBot_ligt_RAG\src\RAG_llm_mistral.py
+  - functions\rag.py
+  - src\services\RAG\rag.py
+----------------------------------------
+MODULE: sqlalchemy
+  - src\services\llm_generation\tools\DB\retrieve_db.py
+  - src\services\tools\DB\retrieve_db.py
+----------------------------------------
+MODULE: src
+  - 1_RAG\UI\gen_ai_streamlit.py
+  - 1_RAG\UI\test-UI.py
+  - 1_RAG\api\rag_api.py
+  - gen_ai_streamlit.py
+  - src\api\rag_api.py
+  - src\gen_ai_streamlit.py
+  - src\services\RAG\embeddings\db_embeddings.py
+  - src\services\RAG\extraction\document_extraction.py
+  - src\services\RAG\rag.py
+  - src\services\RAG\vectorization\vectorization.py
+  - src\services\llm_generation\llm.py
+  - src\services\llm_generation\tools\Rag_tool\rag_tool.py
+  - src\services\llm_generation\tools\tools_calls.py
+  - src\services\tools\Rag_tool\rag_backend.py
+  - src\services\tools\agent_tools.py
+  - src\services\vector_database\vector_db.py
+----------------------------------------
+MODULE: streamlit
+  - 1_RAG\UI\gen_ai_streamlit.py
+  - ChatBot_RAG_Streamlit\src\gen_ai_streamlit.py
+  - functions\gen_ai_streamlit.py
+  - gen_ai_streamlit.py
+  - src\gen_ai_streamlit.py
+----------------------------------------
+MODULE: tools
+  - Agents\workflow\src\ai_agent.py
+----------------------------------------
+MODULE: tools_calls
+  - functions\gen_ai_streamlit.py
+  - functions\llm.py
+----------------------------------------
+MODULE: typing
+  - functions\agent.py
+  - functions\llm.py
+  - functions\prompt.py
+  - src\services\llm_generation\llm.py
+  - src\services\tools\agent_tools_v2.py
+----------------------------------------
+MODULE: uvicorn
+  - 1_RAG\api\rag_api.py
+  - functions\rag_api.py
+  - src\api\rag_api.py
+----------------------------------------
+MODULE: vector_db
+  - functions\rag.py
+----------------------------------------
+MODULE: vectorization
+  - functions\rag.py
+  - functions\vector_db.py
+----------------------------------------
+MODULE: whisper
+  - functions\rag_functions.py
+----------------------------------------
+MODULE: yfinance
+  - src\services\tools\Finance\finance.py
+----------------------------------------

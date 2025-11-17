@@ -21,3 +21,28 @@
 2025-09-14 21:18:45.605156 > INFO > la matrice de correlation
 2025-09-14 21:18:46.582936 > INFO > les boxplots
 2025-11-15 13:42:52.578318 > INFO > http://localhost:8000//query?request=les informations sur la chine
+2025-11-17 13:47:04.891910 > INFO > Chargement du document C:\Users\tallar\Documents\PROJETS\GenAI\docs\files\Aresbal.pdf via le modele all-MiniLM-L6-v2 pour la DB d'embedding rag
+2025-11-17 13:47:04.891910 > INFO > Instanciation de l'extractor
+2025-11-17 13:47:04.892909 > INFO > Instanciation du vectorizer
+2025-11-17 13:47:04.892909 > INFO > Génération du model de vectorization all-MiniLM-L6-v2
+2025-11-17 17:09:34.889377 > INFO > Chargement du document C:\Users\tallar\Documents\PROJETS\GenAI\docs\files\Aresbal.pdf via le modele all-MiniLM-L6-v2 pour la DB d'embedding rag
+2025-11-17 17:09:34.891380 > INFO > Instanciation de l'extractor
+2025-11-17 17:09:34.891380 > INFO > Instanciation du vectorizer
+2025-11-17 17:09:34.891380 > INFO > Génération du model de vectorization all-MiniLM-L6-v2
+2025-11-17 17:09:36.178011 > INFO > Instanciation de l'embedding
+2025-11-17 17:09:36.256124 > INFO > Injection des dépendances dans le model de RAG
+2025-11-17 17:09:36.257121 > INFO > Injection de l'extracteur
+2025-11-17 17:09:36.257121 > INFO > Injection du vectorizer
+2025-11-17 17:09:36.257121 > INFO > Injection de l'embedding
+2025-11-17 17:09:36.257121 > INFO > Extraction des chunks : C:\Users\tallar\Documents\PROJETS\GenAI\docs\files\Aresbal.pdf
+2025-11-17 17:12:19.433080 > INFO >  25 chunks extraits
+2025-11-17 17:12:19.435082 > INFO > Vectorisation des chunks
+2025-11-17 17:12:22.117647 > INFO >  25 chunks vectorisés
+2025-11-17 17:12:22.118638 > INFO > Embedding des vecteurs
+2025-11-17 17:12:22.136756 > INFO > La collection 'rag_collection' existe ✅
+2025-11-17 17:12:22.181254 > INFO > Collection 'rag_collection' supprimée ❌
+2025-11-17 17:12:22.181254 > INFO > Création d'une nouvelle collection
+2025-11-17 17:12:22.406752 > INFO > RAG constitué
+2025-11-17 17:12:22.406752 > INFO > Document chargé et embeddings créés
+2025-11-17 17:15:45.504707 > INFO > consulation du RAG : quels sont les types de membres aresbal?
+2025-11-17 17:15:46.463066 > INFO > reponse du RAG : (["                                                              | 6   |\n| Art 15 : Conditions pour bénéficier des aides                                          | 8   |\n| Art 16 : De la discipline                                                              | 8   |\n| Art 17 : Des défaillances                                                              | 10  |\n| Art 18 : De la reconstitution des fonds                                                | 10  |\n| Art 19 : De l'aval                                                                     | 10  |\n| Art. 20 : De la démission d'un membre                                                  | 10  |\n| Art 21 : De l'assemblée générale                                                       | 10  |\n| Art 22 : Conditions modification du statut ou du ROI                                   | 10  |\n| Art 23 : Conditions de réclamation de ses avoirs (fond de caisse ; …)                  | 11  |\n| Art 24 : Conditions de démission d'un membre           ", '-------------|-------------------|------------|\n|   5 | Vicky         | MAKAMTE           | Membre     |\n|   6 | Laurent       | TALLA             | Membre     |\n|   7 | Steve         | SIGNE TALLA       | Membre     |\n|   8 | Russel        | KAMWA SOH         | Membre     |\n|   9 | Eric          | TCHEUTCHOUA       | Membre     |\n|  10 | Landry        | GHASSI MOUAFFO    | Secrétaire |\n|  11 | Jean-Baptiste | DEFO              | Président  |\n|  12 | Léopold       | TATCHOUANKA       | Membre     |\n|  13 | Béatrice      | JOUONZO           | Membre     |\n|  14 | Joseph        | KOUTSING          | Membre     |\n|  15 | Roland        | KENGNE TALLA      | Membre     |\n|  16 | Marie Chantal | MATCHA            | Membre     |\n\nPage', "on justifiée : elle est constatée après 3 séances consécutives l'amende est de dix 10 € et n'a pas droit aux activités financières du jour\n- Absences aux veillées vingt-cinq 25 €, sauf motif légitime et sérieux.\n\nPage\n\n- Absence lors des séances d'entrainement en vue d'un tournoi (dix) 10 €\n- Absences aux voir Bébé 25 €, sauf motif légitime et sérieux.\n- Retard aux sorties cinq 05 €.\n- Non Port de la tenue 20 €\n- Absence lorsque (A.RES.BA.L) a décidé de participer activement aux activités d'une association sœur : vingt 20 €\n\nLes  absences  sont  justifiées  exclusivement  au  près  du  censeur  via  le  téléphone  de (A.RES.BA.L)  par  SMS  et  auprès  du  membre  concerné  par  l'événement  par  SMS également (contrôle et traçabilité des justificatifs d'absence).\n\n## La présence aux réunions :\n\n- Tous les membres de la réunion sont appelés à payer 10€ symboliques qui seront remis à l'hôte. Et 20 € de cotisation par membre pour le fond de roulement de la réunion: cahiers; stylo et autr"], [{'type': 'types', 'source': 'metadata2', 'auteur': 'auteur'}, {'source': 'metadata24', 'type': 'types', 'auteur': 'auteur'}, {'source': 'metadata19', 'auteur': 'auteur', 'type': 'types'}])

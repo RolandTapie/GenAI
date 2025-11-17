@@ -7,6 +7,7 @@ from src.services.logs.loggers import log
 import chromadb
 load_dotenv()
 local_model=os.getenv("model_path")
+local_model=r"C:\Users\tallar\Documents\PROJETS\GenAI\LLM_Model\Embedding\models--sentence-transformers--all-MiniLM-L6-v2"
 openai_key = os.getenv("openai_key")
 from openai import OpenAI
 import numpy as np

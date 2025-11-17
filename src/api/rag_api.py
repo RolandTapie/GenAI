@@ -27,6 +27,7 @@ import os
 load_dotenv()
 
 
+
 def load_document(document: str, vectorization_model, db_embedding):
 
     log(f"Chargement du document {document} via le modele {vectorization_model} pour la DB d'embedding {db_embedding}")

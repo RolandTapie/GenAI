@@ -5,7 +5,7 @@ import requests
 
 from src.services.Agent.agent import Agent
 from src.services.llm_generation.llm import Model
-from src.services.tools.agent_tools_v2 import AgentTools
+from src.services.tools.agent_tools import AgentTools
 from src.services.memory.agent_memory import AgentMemory
 
 
@@ -156,7 +156,7 @@ def render_chat_html(messages):
     html_parts.append("<div class='chat-wrapper'>")
     html_parts.append(f"<div class='chat-header'><h2 style='margin:6px 0 0 0;'>{modele}</h2>")
     html_parts.append(f"<div class='chat-header'><h2 style='margin:6px 0 0 0;'>💬 LUZ </h2>")
-    html_parts.append("<div style='color:rgba(255,255,255,0.9); font-size:14px;'>Prototype (sans LLM) — réponses = question pour tests</div></div>")
+    html_parts.append(f"<div style='color:rgba(255,255,255,0.9); font-size:14px;'>{agent.get_tools()}</div></div>")
     html_parts.append("<div class='chat-area'>")
 
     for msg in messages:
