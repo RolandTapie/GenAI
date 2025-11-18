@@ -1,0 +1,1 @@
+web: streamlit run gen_ai_streamlit.py --server.port $PORT
